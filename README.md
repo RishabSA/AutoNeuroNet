@@ -68,8 +68,6 @@ Resources I used as reference:
 
 ## Chain Rule and Computational Graph
 
-![image.png](attachment:2efe8d9b-d5aa-43d0-832f-8fd2913b106b:image.png)
-
 - **Automatic Differentiation** applies the **chain rule** **locally** at **each node** and **propagates**
   - For a **function composition** $y = f(g(x)$, the **derivative** using the **chain rule** is given as:
     $$
@@ -100,14 +98,14 @@ Resources I used as reference:
   2. $v_3=\sin(x)$
   3. $y=v_2+v_3$
 - The **forward computation primal evaluation trace** is given below for $x_0 = 2$ and $x_1 = 4$
-  | **Forward Primal Trace** | **Output**        |
+  | **Forward Primal Trace** | **Output** |
   | ------------------------ | ----------------- |
-  | $v_0=x_0$                | $2$               |
-  | $v_1=x_1$                | $4$               |
-  | $v_2=v_0v_1$             | $2(4)=8$          |
-  | $v_3=\sin(x)$            | $0.0349$          |
-  | $v_4=v_2+v_3$            | $8+0.0349=8.0349$ |
-  | $y=v_4$                  | $8.0349$          |
+  | $v_0=x_0$ | $2$ |
+  | $v_1=x_1$ | $4$ |
+  | $v_2=v_0v_1$ | $2(4)=8$ |
+  | $v_3=\sin(x)$ | $0.0349$ |
+  | $v_4=v_2+v_3$ | $8+0.0349=8.0349$ |
+  | $y=v_4$ | $8.0349$ |
 - To make the **differentiation** process **automatic**, we define the **basic differentiation rules** for **all operations**
 - **Automatic Differentiation** comes in $2$ **modes**: **Forward-Mode AD** and **Reverse-Mode AD**
 
@@ -129,23 +127,23 @@ Resources I used as reference:
     - To compute the **partial derivative with respect to $x_0$,** we can substitute $t=v_0$ into the above
     - o compute the **partial derivative with respect to $x_1$,** we can substitute $t=v_1$ into the above
 - The **forward mode primal and derivative trace** is given below for $x_0=2$ and $x_1=4$ to compute $\frac{\partial y}{\partial x_0}$
-  | **Forward Primal Trace** | **Output**        | **Forward Derivative Trace**                                                                                      | **Output**                  |
+  | **Forward Primal Trace** | **Output** | **Forward Derivative Trace** | **Output** |
   | ------------------------ | ----------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------- |
-  | $v_0=x_0$                | $2$               | $\frac{\partial v_0}{\partial v_0} = \frac{\partial v_0}{\partial x_0}$                                           | $1$                         |
-  | $v_1=x_1$                | $4$               | $\frac{\partial v_1}{\partial v_0} = \frac{\partial v_1}{\partial x_0}$                                           | $0$                         |
-  | $v_2=v_0v_1$             | $2(4)=8$          | $\frac{\partial v_2}{\partial v_0} = v_0\frac{\partial v_1}{\partial v_0} + v_1\frac{\partial v_0}{\partial v_0}$ | $2 \cdot 0 + 4 \cdot 1 = 4$ |
-  | $v_3=\sin(v_0)$          | $0.0349$          | $\frac{\partial v_3}{\partial v_0} = \cos(v_0)\frac{\partial v_0}{\partial v_0}$                                  | $0.99 \cdot 1 = 0.99$       |
-  | $v_4=v_2+v_3$            | $8+0.0349=8.0349$ | $\frac{\partial v_4}{\partial v_0} = \frac{\partial v_2}{\partial v_0} + \frac{\partial v_3}{\partial v_0}$       | $4 + 0.99 = 4.99$           |
-  | $y=v_4$                  | $8.0349$          | $\frac{\partial y}{\partial v_0} = \frac{\partial v_4}{\partial v_0}$                                             | $4.99$                      |
+  | $v_0=x_0$ | $2$ | $\frac{\partial v_0}{\partial v_0} = \frac{\partial v_0}{\partial x_0}$ | $1$ |
+  | $v_1=x_1$ | $4$ | $\frac{\partial v_1}{\partial v_0} = \frac{\partial v_1}{\partial x_0}$ | $0$ |
+  | $v_2=v_0v_1$ | $2(4)=8$ | $\frac{\partial v_2}{\partial v_0} = v_0\frac{\partial v_1}{\partial v_0} + v_1\frac{\partial v_0}{\partial v_0}$ | $2 \cdot 0 + 4 \cdot 1 = 4$ |
+  | $v_3=\sin(v_0)$ | $0.0349$ | $\frac{\partial v_3}{\partial v_0} = \cos(v_0)\frac{\partial v_0}{\partial v_0}$ | $0.99 \cdot 1 = 0.99$ |
+  | $v_4=v_2+v_3$ | $8+0.0349=8.0349$ | $\frac{\partial v_4}{\partial v_0} = \frac{\partial v_2}{\partial v_0} + \frac{\partial v_3}{\partial v_0}$ | $4 + 0.99 = 4.99$ |
+  | $y=v_4$ | $8.0349$ | $\frac{\partial y}{\partial v_0} = \frac{\partial v_4}{\partial v_0}$ | $4.99$ |
 - The **forward mode primal and derivative trace** is given below for $x_0=2$ and $x_1=4$ to compute $\frac{\partial y}{\partial x_1}$
-  | **Forward Primal Trace** | **Output**        | **Forward Derivative Trace**                                                                                      | **Output**                  |
+  | **Forward Primal Trace** | **Output** | **Forward Derivative Trace** | **Output** |
   | ------------------------ | ----------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------- |
-  | $v_0=x_0$                | $2$               | $\frac{\partial v_0}{\partial v_1} = \frac{\partial v_0}{\partial x_1}$                                           | $0$                         |
-  | $v_1=x_1$                | $4$               | $\frac{\partial v_1}{\partial v_1} = \frac{\partial v_1}{\partial x_1}$                                           | $1$                         |
-  | $v_2=v_0v_1$             | $2(4)=8$          | $\frac{\partial v_2}{\partial v_1} = v_0\frac{\partial v_1}{\partial v_1} + v_1\frac{\partial v_0}{\partial v_1}$ | $2 \cdot 1 + 4 \cdot 0 = 2$ |
-  | $v_3=\sin(v_0)$          | $0.0349$          | $\frac{\partial v_3}{\partial v_1} = \cos(v_0)\frac{\partial v_0}{\partial v_1}$                                  | $0.99 \cdot 0 = 0$          |
-  | $v_4=v_2+v_3$            | $8+0.0349=8.0349$ | $\frac{\partial v_4}{\partial v_1} = \frac{\partial v_2}{\partial v_1} + \frac{\partial v_3}{\partial v_1}$       | $2+0=2$                     |
-  | $y=v_4$                  | $8.0349$          | $\frac{\partial y}{\partial v_1} = \frac{\partial v_4}{\partial v_1}$                                             | $2$                         |
+  | $v_0=x_0$ | $2$ | $\frac{\partial v_0}{\partial v_1} = \frac{\partial v_0}{\partial x_1}$ | $0$ |
+  | $v_1=x_1$ | $4$ | $\frac{\partial v_1}{\partial v_1} = \frac{\partial v_1}{\partial x_1}$ | $1$ |
+  | $v_2=v_0v_1$ | $2(4)=8$ | $\frac{\partial v_2}{\partial v_1} = v_0\frac{\partial v_1}{\partial v_1} + v_1\frac{\partial v_0}{\partial v_1}$ | $2 \cdot 1 + 4 \cdot 0 = 2$ |
+  | $v_3=\sin(v_0)$ | $0.0349$ | $\frac{\partial v_3}{\partial v_1} = \cos(v_0)\frac{\partial v_0}{\partial v_1}$ | $0.99 \cdot 0 = 0$ |
+  | $v_4=v_2+v_3$ | $8+0.0349=8.0349$ | $\frac{\partial v_4}{\partial v_1} = \frac{\partial v_2}{\partial v_1} + \frac{\partial v_3}{\partial v_1}$ | $2+0=2$ |
+  | $y=v_4$ | $8.0349$ | $\frac{\partial y}{\partial v_1} = \frac{\partial v_4}{\partial v_1}$ | $2$ |
 - **Forward-Mode AD** is **easy to implement**
 - It has a **big issue**: **for every variable** that the **derivative is computed for**, the entire **program** has to be **run again**
   - With **networks** with **many parameters**, this is **incredibly inefficient**
@@ -171,14 +169,14 @@ Resources I used as reference:
   - Initialize $\bar{y} = \frac{\partial y}{\partial y} = 1$ and **backpropagate derivatives** with the **chain rule**
     - At the end of this process, we get $\bar{x}_i = \frac{\partial y}{\partial x_i}$ for **all inputs** in a **single backward pass**
 - The **forward mode primal and reverse mode adjoint trace** is given below for $x_0=2$ and $x_1=4$
-  | **Forward Primal Trace** | **Output**        | **Reverse Adjoint Trace**                                             | **Output**                         |
+  | **Forward Primal Trace** | **Output** | **Reverse Adjoint Trace** | **Output** |
   | ------------------------ | ----------------- | --------------------------------------------------------------------- | ---------------------------------- |
-  | $v_0=x_0$                | $2$               | $\bar{v}_0=\bar{x}_0=\bar{v}_3 \cdot \cos(v_0) + \bar{v}_2 \cdot v_1$ | $1 \cdot 0.999 +1 \cdot 4 = 4.999$ |
-  | $v_1=x_1$                | $4$               | $\bar{v}_1=\bar{x}_1=\bar{v}_4 \cdot 1 + \bar{v}_2 \cdot v_0$         | $1 \cdot 1 + 1\cdot 2=3$           |
-  | $v_2=v_0v_1$             | $2(4)=8$          | $\bar{v}_2=\bar{v}_4 \cdot 1$                                         | $1 \cdot 1= 1$                     |
-  | $v_3=\sin(v_0)$          | $0.0349$          | $\bar{v}_3 = \bar{v}_4 \cdot 1$                                       | $1 \cdot 1 = 1$                    |
-  | $v_4=v_2+v_3$            | $8+0.0349=8.0349$ | $\bar{v}_4=\bar{y}$                                                   | $1$                                |
-  | $y=v_4$                  | $8.0349$          | $\bar{y}$                                                             | $1$                                |
+  | $v_0=x_0$ | $2$ | $\bar{v}_0=\bar{x}_0=\bar{v}_3 \cdot \cos(v_0) + \bar{v}_2 \cdot v_1$ | $1 \cdot 0.999 +1 \cdot 4 = 4.999$ |
+  | $v_1=x_1$ | $4$ | $\bar{v}_1=\bar{x}_1=\bar{v}_4 \cdot 1 + \bar{v}_2 \cdot v_0$ | $1 \cdot 1 + 1\cdot 2=3$ |
+  | $v_2=v_0v_1$ | $2(4)=8$ | $\bar{v}_2=\bar{v}_4 \cdot 1$ | $1 \cdot 1= 1$ |
+  | $v_3=\sin(v_0)$ | $0.0349$ | $\bar{v}_3 = \bar{v}_4 \cdot 1$ | $1 \cdot 1 = 1$ |
+  | $v_4=v_2+v_3$ | $8+0.0349=8.0349$ | $\bar{v}_4=\bar{y}$ | $1$ |
+  | $y=v_4$ | $8.0349$ | $\bar{y}$ | $1$ |
 - **Basic derivative rules** are applied in the **reverse pass**
 - **Reverse-Mode AD** works best when $n$ **parameters** is **large** and $m$ **outputs** is **small** (few outputs depending lots of parameters)
   - Used in the **training of neural networks**
