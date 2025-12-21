@@ -1,7 +1,7 @@
 #include <iostream>
-#include "Matrix.hpp"
+#include "autodiff/Matrix.hpp"
 
-// g++ matrices.cpp Matrix.cpp Var.cpp -o matrices && ./matrices
+// g++ matrices.cpp src/autodiff/Var.cpp src/autodiff/Matrix.cpp -I include -o matrices && ./matrices
 
 int main() {
     Matrix mat(5, 5);

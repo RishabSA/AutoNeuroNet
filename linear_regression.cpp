@@ -1,7 +1,7 @@
 #include <iostream>
-#include "Matrix.hpp"
+#include "autodiff/Matrix.hpp"
 
-// g++ linear_regression.cpp Matrix.cpp Var.cpp -o linear_regression && ./linear_regression
+// g++ linear_regression.cpp src/autodiff/Var.cpp src/autodiff/Matrix.cpp -I include -o linear_regression && ./linear_regression
 
 int main () {
     int out_dim = 1;
