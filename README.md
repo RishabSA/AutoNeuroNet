@@ -5,6 +5,8 @@ Resources I used as reference:
 - [What's Automatic Differentiation? - HuggingFace](https://huggingface.co/blog/andmholm/what-is-automatic-differentiation)
 - [Differentiate Automatically](https://comp6248.ecs.soton.ac.uk/handouts/autograd-handouts.pdf)
 
+---
+
 - Computing **derivatives** and **gradients** is very important for **machine learning**
   - Needed for **gradient-based optimization algorithms**
 - Methods of **computing derivatives** **through code:**
