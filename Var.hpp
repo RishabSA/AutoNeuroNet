@@ -1,0 +1,58 @@
+#pragma once
+
+#include <vector>
+#include <tuple>
+#include <cmath>
+
+class Var {
+public:
+    Var(double initial) {
+        val = initial;
+        gradVal = std::nan("");
+    };
+
+    ~Var() = default;
+
+    double getVal() { return val; };
+    void setVal(double v) {
+        val = v;
+    };
+
+    double getGradVal() { return gradVal; };
+    void setGradVal(double v) {
+        gradVal = v;
+    };
+
+    Var add(Var& other);
+    Var operator+(Var& other) { return add(other); };
+
+    Var subtract(Var& other);
+    Var operator-(Var& other) { return subtract(other); };
+
+    Var multiply(Var& other);
+    Var operator*(Var& other) { return multiply(other); };
+
+    Var divide(Var& other);
+    Var operator/(Var& other) { return divide(other); };
+
+    Var pow(int power);
+
+    Var sin();
+    Var cos();
+    Var tan();
+    Var sec();
+    Var csc();
+    Var cot();
+
+    Var log();
+    Var log(int base);
+
+    Var exp();
+
+    double grad();
+
+private:
+    double val;
+    double gradVal;
+    std::vector<std::tuple<double, Var*>> children;
+};

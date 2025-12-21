@@ -1,133 +1,22 @@
 #include <iostream>
-#include <cmath>
+#include "Var.hpp"
 
-class Var {
-public:
-    Var(double initial) {
-        val = initial;
-        gradVal = std::nan("");
-    };
-
-    ~Var() = default;
-
-    double getVal() { return val; };
-    void setVal(double v) {
-        val = v;
-    };
-
-    double getGradVal() { return gradVal; };
-    void setGradVal(double v) {
-        gradVal = v;
-    };
-
-    Var add(Var& other) {
-        Var z(val + other.val);
-
-        // dz/d_self = 1.0
-        children.emplace_back(1.0, &z);
-
-        // dz/d_other = 1.0
-        other.children.emplace_back(1.0, &z);
-
-        return z;
-    };
-
-    Var operator+(Var& other) {
-        return add(other);
-    };
-
-    Var subtract(Var& other) {
-        Var z(val - other.val);
-
-        // dz/d_self = 1.0
-        children.emplace_back(1.0, &z);
-
-        // dz/d_other = -1.0
-        other.children.emplace_back(-1.0, &z);
-
-        return z;
-    };
-
-    Var operator-(Var& other) {
-        return subtract(other);
-    };
-
-    Var multiply(Var& other) {
-        Var z(val * other.val);
-
-        // dz/d_self = other.val
-        children.emplace_back(other.val, &z);
-
-        // dz/d_other = val
-        other.children.emplace_back(val, &z);
-
-        return z;
-    };
-
-    Var operator*(Var& other) {
-        return multiply(other);
-    };
-
-    Var divide(Var& other) {
-        Var z(val / other.val);
-
-        // dz/d_self = 1 / other.val
-        children.emplace_back(1.0 / other.val, &z);
-
-        // dz/d_other = -value / other.val^2
-        other.children.emplace_back(-val / std::pow(other.val, 2), &z);
-
-        return z;
-    };
-
-    Var operator/(Var& other) {
-        return divide(other);
-    };
-
-    Var pow(int power) {
-        Var z(std::pow(val, power));
-
-        // dz/d_self = power * val ** (power - 1)
-        children.emplace_back(power * std::pow(val, power - 1), &z);
-
-        return z;
-    };
-
-    double grad() {
-        if (std::isnan(gradVal)) {
-            // Compute derivative with the chain rule
-            double sum = 0.0;
-            
-            for (auto child : children) {
-                sum += std::get<0>(child) * std::get<1>(child)->grad();
-            }
-
-            gradVal = sum;
-        }
-
-        return gradVal;
-    };
-
-private:
-    double val;
-    double gradVal;
-    std::vector<std::tuple<double, Var*>> children;
-};
+// g++ automatic_differentiation.cpp Var.cpp -o automatic_differentiation && ./automatic_differentiation
 
 int main () {
     // Reverse-Mode Automatic Differentiation
 
-    Var x(5.0);
-    Var y(10.0);
+    Var x0(5.0);
+    Var x1(10.0);
 
-    Var z = x.pow(2);
-    Var f = y * z;
-    f.setGradVal(1.0);
+    Var z = x0.pow(2);
+    Var y = x1 * z;
+    y.setGradVal(1.0);
 
-    std::cout << "f(x) =s" << f.getVal() << std::endl; // 250
+    std::cout << "f(x) = " << y.getVal() << std::endl; // 250
 
-    std::cout << "df/dx = " << x.grad() << std::endl; // 100
-    std::cout << "df/dy = " << y.grad() << std::endl; // 25
+    std::cout << "df/dx = " << x0.grad() << std::endl; // 100
+    std::cout << "df/dy = " << x1.grad() << std::endl; // 25
 
     return 0;
 }
