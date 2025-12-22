@@ -6,16 +6,16 @@
 // g++ -std=c++11 -Wall -O0 -g src/main.cpp $(pkg-config --cflags --libs sdl2) -o build/debug/plot
 // ./build/debug/plot
 
-inline int toScreenX(double x, double xmin, double xmax, int W) {
-    return (int) std::lround((x - xmin) * (W - 1) / (xmax - xmin));
+int toScreenX(double x, double xMin, double xMax, int width) {
+    return (int) std::lround((x - xMin) * (width - 1) / (xMax - xMin));
 }
 
-inline int toScreenY(double y, double ymin, double ymax, int H) {
-    return (int) std::lround((ymax - y) * (H - 1) / (ymax - ymin));
+int toScreenY(double y, double yMin, double yMax, int height) {
+    return (int) std::lround((yMax - y) * (height - 1) / (yMax - yMin));
 }
 
-inline int clamp(int v, int low, int hi) {
-    return v < low ? low : (v > hi ? hi : v);
+int clamp(int val, int low, int high) {
+    return val < low ? low : (val > high ? high : val);
 }
 
 double function (double x) {
@@ -32,32 +32,32 @@ int main() {
     SDL_CreateWindowAndRenderer(width, height, 0, &window, &renderer);
     SDL_SetWindowTitle(window, "Plot");
 
-    double xmin = -10;
-    double xmax = 10;
+    double xMin = -10;
+    double xMax = 10;
 
-    double ymin = -2;
-    double ymax = 2;
+    double yMin = -2;
+    double yMax = 2;
 
     bool running = true;
     while (running) {
-        SDL_Event e;
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) running = false;
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) running = false;
         }
 
-        // Clear
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
         // Draw axes
         SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
-        if (xmin <= 0 && 0 <= xmax) {
-            int x0 = toScreenX(0, xmin, xmax, width);
+        
+        if (xMin <= 0 && 0 <= xMax) {
+            int x0 = toScreenX(0, xMin, xMax, width);
             SDL_RenderDrawLine(renderer, x0, 0, x0, height - 1);
         }
 
-        if (ymin <= 0 && 0 <= ymax) {
-            int y0 = toScreenY(0, ymin, ymax, height);
+        if (yMin <= 0 && 0 <= yMax) {
+            int y0 = toScreenY(0, yMin, yMax, height);
             SDL_RenderDrawLine(renderer, 0, y0, width - 1, y0);
         }
 
@@ -68,19 +68,19 @@ int main() {
         int pxPrev = 0, pyPrev = 0;
 
         for (int sx = 0; sx < width; sx++) {
-            double x = xmin + (xmax - xmin) * (double)sx / (double)(width - 1);
+            double x = xMin + (xMax - xMin) * (double) sx / (double)(width - 1);
             double y = function(x); // y = f(x)
 
-            // Skip non-finite results (asymptotes, domain issues)
+            // Skip non-finite results, such as asymptotes
             if (!std::isfinite(y)) { havePrev = false; continue; }
 
-            int sy = toScreenY(y, ymin, ymax, height);
+            int sy = toScreenY(y, yMin, yMax, height);
 
-            // If y is outside viewport, break the line so it doesn’t smear
+            // If y is outside viewport, break the line 
             if (sy < -100000 || sy > 100000) { havePrev = false; continue; }
 
             if (havePrev) {
-                // Clip a bit to avoid crazy long lines at edges
+                // Clamping to avoid long lines at edges
                 int y1 = clamp(pyPrev, -2000, height + 2000);
                 int y2 = clamp(sy, -2000, height + 2000);
                 SDL_RenderDrawLine(renderer, pxPrev, y1, sx, y2);
