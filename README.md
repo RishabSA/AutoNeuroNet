@@ -1,4 +1,17 @@
-# Automatic Differentiation with C++
+# Automatic Differentiation
+
+## Setup
+
+My implementation uses C++ for all derivatives, matrices, and neural networks. PyBind11 is used to make these accessible in Python.
+
+To build the necessary C++ classes for use in Python run:
+
+```
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+The C++ dependencies can then be accessed from the build/ folder and imported in any Python files.
 
 Resources I used as reference:
 
@@ -14,7 +27,7 @@ Resources I used as reference:
   - **Symbolic Differentiation**
   - **Automatic Differentiation**
 
-# Numeric Differentiation
+## Numeric Differentiation
 
 - **Numeric Differentiation** uses the **limit definition** of a **derivative** to compute the **derivative** at a **point**
   - To evaluate the **derivative** of a function $f$ at the point $x$, compute the **instantaneous rate of change** at the point $x$ as $h$ approaches $0$
@@ -31,7 +44,7 @@ Resources I used as reference:
     - **Combination** of the **forward** and **backward difference** for **differentiation**
       - **More stable** than **forward numeric differentiation** as it reduces **any** **truncation error** by a factor of $2$
 
-## Issues
+### Issues
 
 - **Requires multiple function evaluations** to compute the **derivative**
 - Results can change with the choice of $h$
@@ -40,14 +53,14 @@ Resources I used as reference:
   - **Round-off error** is the **error** due to **inaccuracies** with **floating point values in computers**
     - Increasing the **precision** of $h$ **increases hardware constraints** due to **more memory requirements**
 
-# Symbolic Differentiation
+## Symbolic Differentiation
 
 - **Symbolic Differentiation** is another approach to **computing derivatives**
   - Converts **symbolic mathematical expressions** to their **symbolic derivative expressions**
   - Uses the **derivative rules** of **Calculus**, such as the **product rule**, **chain rule**, **quotient rule**, **trig derivatives**, etc
   - `sympy` is a **python library** designed for **symbolic math** in **python**, which has **symbolic differentiation**
 
-## Issues
+### Issues
 
 - With very complex functions, the **derivative expressions grow very fast,** become **extremely long**, and **require extra computations**
   - Taking the **derivative** of a **product** with the **product rule** grows the number of **terms** and **computations**
@@ -58,7 +71,7 @@ Resources I used as reference:
 - **Limited** to **closed-form, mathematical expressions**
   - **Symbolic Differentiation** cannot represent **derivatives** when working with **control flow changes** (if statements, loops, etc)
 
-# Automatic Differentiation
+## Automatic Differentiation
 
 - **Automatic Differentiation** **(AD)** uses the **chain rule** on the **sequence** of **primitive operations** that are being **computed**
   - **Expresses** **composite functions** in the **variables** and **elementary operations** that form them
@@ -68,7 +81,7 @@ Resources I used as reference:
 - **AD represents** a **program** as a **graph of primitive operations**, then **propagates derivatives through it** with the c**hain rule**
   - **Stores information** for **forward computations** that can be reused for **backward propagation**
 
-## Chain Rule and Computational Graph
+### Chain Rule and Computational Graph
 
 - **Automatic Differentiation** applies the **chain rule** **locally** at **each node** and **propagates**
   - For a **function composition** $y = f(g(x)$, the **derivative** using the **chain rule** is given as:
@@ -111,7 +124,7 @@ Resources I used as reference:
 - To make the **differentiation** process **automatic**, we define the **basic differentiation rules** for **all operations**
 - **Automatic Differentiation** comes in $2$ **modes**: **Forward-Mode AD** and **Reverse-Mode AD**
 
-## Forward-Mode Automatic Differentiation
+### Forward-Mode Automatic Differentiation
 
 - **Forward-Mode Automatic differentiation** **propagates (value, derivative) pairs forward**
   - **Stores** **(value, derivative) pairs** at each **computation**
@@ -153,7 +166,7 @@ Resources I used as reference:
   - **Forward-Mode AD** works best when $n$ **parameters** is **small** and $m$ **outputs** is **large** (lots of outputs depending on few parameters)
 - The solution is **Reverse-Mode Automatic Differentiation**
 
-## **Reverse-Mode Automatic Differentiation**
+### **Reverse-Mode Automatic Differentiation**
 
 - **Reverse-Mode Automatic Differentiation** is **more efficient** than **Forward-Mode AD**
   - Works well when working with **many parameters** like in **neural networks**

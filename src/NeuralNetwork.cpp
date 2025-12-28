@@ -1,4 +1,4 @@
-#include "autodiff/NeuralNetwork.hpp"
+#include "NeuralNetwork.hpp"
 
 void NeuralNetwork::addLayer(std::pair<int, int> l) {
     // Input: layer with (in_dim, out_dim)

@@ -1,7 +1,7 @@
 #include <iostream>
-#include "autodiff/NeuralNetwork.hpp"
+#include "NeuralNetwork.hpp"
 
-// g++ linear_regression.cpp src/autodiff/Var.cpp src/autodiff/Matrix.cpp src/autodiff/NeuralNetwork.cpp -I include -o linear_regression && ./linear_regression
+// g++ linear_regression.cpp src/Var.cpp src/Matrix.cpp src/NeuralNetwork.cpp -I include -o linear_regression && ./linear_regression
 
 int main () {
     int in_dim = 1;

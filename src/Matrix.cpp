@@ -1,4 +1,4 @@
-#include "autodiff/Matrix.hpp"
+#include "Matrix.hpp"
 
 void Matrix::resetGradAndParents() {
     for (int i = 0; i < rows; ++i) {

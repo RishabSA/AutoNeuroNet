@@ -1,4 +1,4 @@
-#include "autodiff/Var.hpp"
+#include "Var.hpp"
 
 void Var::resetGradAndParents() {
     visited = false;

@@ -1,7 +1,7 @@
 #include <iostream>
-#include "autodiff/Var.hpp"
+#include "Var.hpp"
 
-// g++ automatic_differentiation.cpp src/autodiff/Var.cpp -I include -o automatic_differentiation && ./automatic_differentiation
+// g++ automatic_differentiation.cpp src/Var.cpp -I include -o automatic_differentiation && ./automatic_differentiation
 
 int main () {
     // Reverse-Mode Automatic Differentiation

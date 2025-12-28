@@ -1,4 +1,4 @@
-#include "autodiff/OldVar.hpp"
+#include "OldVar.hpp"
 
 void Var::resetGradAndChildren() {
     gradVal = std::nan("");
