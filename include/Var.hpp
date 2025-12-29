@@ -14,12 +14,12 @@ public:
 
     ~Var() = default;
 
-    double getVal() { return val; };
+    double getVal() const { return val; };
     void setVal(double v) {
         val = v;
     };
 
-    double getGradVal() { return gradVal; };
+    double getGradVal() const { return gradVal; };
     void setGradVal(double v) {
         gradVal = v;
     };
@@ -48,7 +48,6 @@ public:
     Var cot();
 
     Var log();
-    Var log(int base);
 
     Var exp();
 

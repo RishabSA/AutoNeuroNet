@@ -7,7 +7,7 @@ My implementation uses C++ for all derivatives, matrices, and neural networks. P
 To build the necessary C++ classes for use in Python run:
 
 ```
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cmake --build build
 ```
 

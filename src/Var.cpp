@@ -133,21 +133,6 @@ Var Var::log() {
     return y;
 };
 
-// log - base n
-Var Var::log(int base) {
-    if (val <= 0.0 || base <= 0.0 || base == 1.0) {
-        return std::numeric_limits<double>::quiet_NaN(); 
-    }
-
-    // Use log base change rule with natural log
-    Var y(std::log(val) / std::log(base));
-
-    // ∂y/∂this = 1/(ln(base) * val)
-    y.parents.emplace_back(1 / (std::log(base) * val), this);
-
-    return y;
-};
-
 Var Var::exp() {
     Var y(std::exp(val));
 

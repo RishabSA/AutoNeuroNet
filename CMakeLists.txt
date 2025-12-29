@@ -1,30 +1,23 @@
-cmake_minimum_required(VERSION 3.5...3.18)
-project(SimplePyBindExample)
+cmake_minimum_required(VERSION 4.1)
+project(automatic_differentiation)
 
-find_package (Python3 COMPONENTS Interpreter Development REQUIRED)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
 execute_process(
-    COMMAND ${Python3_EXECUTABLE} -m pybind11 --cmakedir
-    OUTPUT_VARIABLE PYBIND11_CMAKE_DIR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND ${Python3_EXECUTABLE} -m pybind11 --cmakedir
+  OUTPUT_VARIABLE PYBIND11_CMAKE_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(pybind11_DIR ${PYBIND11_CMAKE_DIR})
-
-message(STATUS "Using pybind11 found at: ${pybind11_DIR}")
 find_package(pybind11 REQUIRED)
 
-# Create Python module
-pybind11_add_module(simple_module pybind_wrapper.cpp)
-
-set_target_properties(simple_module PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
-
-set(INIT_PY "${CMAKE_CURRENT_BINARY_DIR}/__init__.py")
-if(NOT EXISTS ${INIT_PY})
-    file(WRITE ${INIT_PY} "")
-endif()
-
-add_custom_command(TARGET simple_module POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-            $<TARGET_FILE_DIR:simple_module>/$<TARGET_FILE_NAME:simple_module>
-            ${CMAKE_CURRENT_BINARY_DIR}/$<TARGET_FILE_NAME:simple_module>
+pybind11_add_module(Var
+  pybind_wrapper.cpp
+  src/Var.cpp
 )
+
+target_include_directories(Var PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
