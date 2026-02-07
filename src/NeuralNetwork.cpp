@@ -1,5 +1,25 @@
 #include "NeuralNetwork.hpp"
 
+NeuralNetwork::NeuralNetwork(std::vector<std::pair<int, int>> l) {
+    // Input: vector of layers, each of (in_dim, out_dim)
+
+    for (auto i : l) {
+        int in_dim = i.first;
+        int out_dim = i.second;
+
+        Matrix W = Matrix(in_dim, out_dim);
+        W.randomInit();
+
+        Matrix b = Matrix(1, out_dim);
+
+        layers.emplace_back(W, b);
+    }
+};
+
+std::vector<std::pair<Matrix, Matrix>> NeuralNetwork::getLayers() const {
+    return layers;
+}
+
 void NeuralNetwork::addLayer(std::pair<int, int> l) {
     // Input: layer with (in_dim, out_dim)
     int in_dim = l.first;
@@ -25,6 +45,23 @@ Matrix NeuralNetwork::forward(const Matrix& input) {
 
     return output;
 };
+
+std::string NeuralNetwork::getNetworkArchitecture() const {
+    if (layers.empty()) {
+        return "[]";
+    }
+
+    std::string architecture = "[";
+    architecture += std::to_string(layers[0].first.rows);
+
+    for (const auto& layer : layers) {
+        architecture += " -> ";
+        architecture += std::to_string(layer.first.cols);
+    }
+
+    architecture += "]";
+    return architecture;
+}
 
 Var computeMSELoss(Matrix& labels, Matrix& preds) {
     if (labels.rows != preds.rows || labels.cols != preds.cols) {

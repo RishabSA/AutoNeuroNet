@@ -11,13 +11,13 @@ int main () {
 
     Var z = x0.pow(2);
     Var y = x1 * z;
-    y.setGradVal(1.0);
+    y.setGrad(1.0);
     y.backward();
 
     std::cout << "y = " << y.getVal() << std::endl; // 250
 
-    std::cout << "∂f/∂x_0 = " << x0.getGradVal() << std::endl; // 100
-    std::cout << "∂f/∂x_1 = " << x1.getGradVal() << std::endl; // 25
+    std::cout << "∂f/∂x_0 = " << x0.getGrad() << std::endl; // 100
+    std::cout << "∂f/∂x_1 = " << x1.getGrad() << std::endl; // 25
 
     return 0;
 }

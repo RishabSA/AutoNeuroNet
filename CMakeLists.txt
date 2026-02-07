@@ -1,3 +1,6 @@
+# cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+# cmake --build build
+
 cmake_minimum_required(VERSION 4.1)
 project(automatic_differentiation)
 
@@ -19,6 +22,7 @@ pybind11_add_module(autodiff
     pybind_wrapper.cpp
     src/Var.cpp
     src/Matrix.cpp
+    src/NeuralNetwork.cpp
 )
 
 target_include_directories(autodiff PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -8,7 +8,7 @@ def autodiff_var_demo():
     z = x0**2
     y = z * x1
 
-    y.gradVal = 1
+    y.grad = 1
     y.backward()
 
     print(f"y = {y}")
@@ -34,5 +34,5 @@ def autodiff_matrix_demo():
 
 
 if __name__ == "__main__":
-    # autodiff_var_demo()
-    autodiff_matrix_demo()
+    autodiff_var_demo()
+    # autodiff_matrix_demo()

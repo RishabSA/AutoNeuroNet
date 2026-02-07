@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include "include/Var.hpp"
 #include "include/Matrix.hpp"
+#include "include/NeuralNetwork.hpp"
 
 namespace py = pybind11;
 
@@ -21,22 +22,34 @@ after setting its gradient to 1.0 to accumulate gradients.
         .def("setVal", &Var::setVal, py::arg("v"))
         .def_property("val", &Var::getVal, &Var::setVal)
 
-        .def("getGradVal", &Var::getGradVal)
-        .def("setGradVal", &Var::setGradVal, py::arg("v"))
-        .def_property("gradVal", &Var::getGradVal, &Var::setGradVal)
+        .def("getGrad", &Var::getGrad)
+        .def("setGrad", &Var::setGrad, py::arg("v"))
+        .def_property("grad", &Var::getGrad, &Var::setGrad)
 
-        .def("add", &Var::add, py::arg("other"))
+        .def("add", py::overload_cast<Var&>(&Var::add), py::arg("other"))
+        .def("add", py::overload_cast<double>(&Var::add), py::arg("other"))
         .def("__add__", [](Var &a, Var &b) { return a.add(b); }, py::is_operator())
+        .def("__add__", [](Var &a, double s) { return a.add(s); }, py::is_operator())
+        .def("__radd__", [](Var &a, double s) { return a.add(s); }, py::is_operator())
 
-        .def("subtract", &Var::subtract, py::arg("other"))
+        .def("subtract", py::overload_cast<Var&>(&Var::subtract), py::arg("other"))
+        .def("subtract", py::overload_cast<double>(&Var::subtract), py::arg("other"))
         .def("__sub__", [](Var &a, Var &b) { return a.subtract(b); }, py::is_operator())
+        .def("__sub__", [](Var &a, double s) { return a.subtract(s); }, py::is_operator())
+        .def("__rsub__", [](Var &a, double s) { return Var(s).subtract(a); }, py::is_operator())
 
-        .def("multiply", &Var::multiply, py::arg("other"))
+        .def("multiply", py::overload_cast<Var&>(&Var::multiply), py::arg("other"))
+        .def("multiply", py::overload_cast<double>(&Var::multiply), py::arg("other"))
         .def("__mul__", [](Var &a, Var &b) { return a.multiply(b); }, py::is_operator())
+        .def("__mul__", [](Var &a, double s) { return a.multiply(s); }, py::is_operator())
+        .def("__rmul__", [](Var &a, double s) { return a.multiply(s); }, py::is_operator())
         .def("__neg__", [](Var &a) { Var neg(-1.0); return a.multiply(neg); }, py::is_operator())
 
-        .def("divide", &Var::divide, py::arg("other"))
+        .def("divide", py::overload_cast<Var&>(&Var::divide), py::arg("other"))
+        .def("divide", py::overload_cast<double>(&Var::divide), py::arg("other"))
         .def("__truediv__", [](Var &a, Var &b) { return a.divide(b); }, py::is_operator())
+        .def("__truediv__", [](Var &a, double s) { return a.divide(s); }, py::is_operator())
+        .def("__rtruediv__", [](Var &a, double s) { return Var(s).divide(a); }, py::is_operator())
 
         .def("pow", &Var::pow, py::arg("power"))
         .def("__pow__", [](Var &a, int p) { return a.pow(p); }, py::is_operator(), py::arg("power"))
@@ -55,7 +68,7 @@ after setting its gradient to 1.0 to accumulate gradients.
         .def("backward", &Var::backward)
 
         .def("__repr__", [](const Var& v) {
-            return "Var(val=" + std::to_string(v.getVal()) + ", grad=" + std::to_string(v.getGradVal()) + ")";
+            return "Var(val=" + std::to_string(v.getVal()) + ", grad=" + std::to_string(v.getGrad()) + ")";
         });
 
     py::class_<Matrix>(m, "Matrix", R"doc(
@@ -89,6 +102,18 @@ A matrix of Var objects.
                     throw std::out_of_range("Matrix index out of range");
                     
                 M(i, j) = Var(v);
+            },
+            py::arg("index"), py::arg("value"))
+        .def("__setitem__", [](Matrix &M, py::tuple idx, const Var &v) {
+                if (idx.size() != 2) throw std::runtime_error("Use M[i, j]");
+
+                int i = idx[0].cast<int>();
+                int j = idx[1].cast<int>();
+
+                if (i < 0 || i >= M.rows || j < 0 || j >= M.cols)
+                    throw std::out_of_range("Matrix index out of range");
+
+                M(i, j) = v;
             },
             py::arg("index"), py::arg("value"))
 
@@ -128,5 +153,22 @@ A matrix of Var objects.
             return "Matrix(" + std::to_string(M.rows) + " x " + std::to_string(M.cols) + ") = \n" + M.getValsMatrix();
         });
 
+    py::class_<NeuralNetwork>(m, "NeuralNetwork", R"doc(
+A simple feed-forward neural network built from Matrix layers.
+)doc")
+        .def(py::init<std::vector<std::pair<int, int>>>(), py::arg("layers"))
+
+        .def("getLayers", &NeuralNetwork::getLayers)
+        .def_property_readonly("layers", &NeuralNetwork::getLayers)
+
+        .def("addLayer", &NeuralNetwork::addLayer, py::arg("layer"))
+        .def("forward", &NeuralNetwork::forward, py::arg("input"))
+        .def("getNetworkArchitecture", &NeuralNetwork::getNetworkArchitecture)
+        
+        .def("__repr__", [](const NeuralNetwork &model) {
+            return "NeuralNetwork =\n" + model.getNetworkArchitecture();
+        });
+
     m.def("matmul", &matmul, py::arg("A"), py::arg("B"));
+    m.def("computeMSELoss", &computeMSELoss, py::arg("labels"), py::arg("preds"));
 }

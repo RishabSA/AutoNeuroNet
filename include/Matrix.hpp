@@ -10,14 +10,7 @@ public:
     int rows, cols;
     std::vector<std::vector<Var>> data;
 
-    Matrix(int r, int c) {
-        rows = r;
-        cols = c;
-
-        data = std::vector<std::vector<Var>>(
-            r, std::vector<Var>(c, Var(0.0))
-        );
-    };
+    Matrix(int r, int c);
 
     Var& operator()(int row, int col) {
         return data[row][col];

@@ -1,5 +1,15 @@
 #include "Matrix.hpp"
 
+Matrix::Matrix(int r, int c) {
+    rows = r;
+    cols = c;
+
+    data.resize(r);
+    for (int i = 0; i < r; ++i) {
+        data[i].resize(c);
+    }
+};
+
 void Matrix::resetGradAndParents() {
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
@@ -27,7 +37,7 @@ std::string Matrix::getGradsMatrix() const {
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            out += std::to_string(data[i][j].getGradVal());
+            out += std::to_string(data[i][j].getGrad());
             out += " ";
         }
         out += "\n";

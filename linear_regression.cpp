@@ -31,7 +31,7 @@ int main () {
         X.resetGradAndParents();
         Y_true.resetGradAndParents();
 
-        for (auto& layer : model.layers) {
+        for (auto& layer : model.getLayers()) {
             Matrix& W = layer.first;
             Matrix& b = layer.second;
 
@@ -47,39 +47,39 @@ int main () {
         double loss_val = loss.getVal();
 
         // Backpropagation (Reverse-Mode Automatic Differentiation)
-        loss.setGradVal(1.0);
+        loss.setGrad(1.0);
         loss.backward();
 
         // Backpropagation and Gradient Descent for each parameter
-        for (auto& layer : model.layers) {
+        for (auto& layer : model.getLayers()) {
             Matrix& W = layer.first;
             Matrix& b = layer.second;
 
             // Update W
-            for (int i = 0; i < W.rows; ++i) {
-                for (int j = 0; j < W.cols; ++j) {
+            for (int i = 0; i < W.rows; i++) {
+                for (int j = 0; j < W.cols; j++) {
                     Var& weight_param = W.data[i][j];
 
                     // Partial derivative of the Loss function with respect to the weight parameter
-                    double gradient = weight_param.getGradVal();
+                    double gradient = weight_param.getGrad();
                     weight_param.setVal(weight_param.getVal() - lr * gradient);
                 }
             }
 
             // Update b
-            for (int i = 0; i < b.rows; ++i) {
-                for (int j = 0; j < b.cols; ++j) {
+            for (int i = 0; i < b.rows; i++) {
+                for (int j = 0; j < b.cols; j++) {
                     Var& bias_param = b.data[i][j];
 
                     // Partial derivative of the Loss function with respect to the bias parameter
-                    double gradient = bias_param.getGradVal();
+                    double gradient = bias_param.getGrad();
                     bias_param.setVal(bias_param.getVal() - lr * gradient);
                 }
             }
         }
 
         if (epoch % 100 == 0) {
-            std::cout << "Epoch " << epoch + 1 << " | train loss: " << loss_val << "\n";
+            std::cout << "Epoch " << epoch + 1 << " | Train Loss: " << loss_val << "\n";
         }
     }
 

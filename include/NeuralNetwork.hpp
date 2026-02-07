@@ -8,21 +8,9 @@ class NeuralNetwork {
 public:
     std::vector<std::pair<Matrix, Matrix>> layers;
 
-    NeuralNetwork(std::vector<std::pair<int, int>> l) {
-        // Input: vector of layers, each of (in_dim, out_dim)
+    std::vector<std::pair<Matrix, Matrix>> getLayers() const;
 
-        for (auto i : l) {
-            int in_dim = i.first;
-            int out_dim = i.second;
-
-            Matrix W = Matrix(in_dim, out_dim);
-            W.randomInit();
-
-            Matrix b = Matrix(1, out_dim);
-
-            layers.emplace_back(W, b);
-        }
-    };
+    NeuralNetwork(std::vector<std::pair<int, int>> l);
 
     std::pair<const Matrix&, const Matrix&> getLayer(int idx) { return layers.at(idx); };
 
@@ -30,7 +18,7 @@ public:
 
     Matrix forward(const Matrix& input);
 
-    std::string getNetworkArchitecture();
+    std::string getNetworkArchitecture() const;
 };
 
 Var computeMSELoss(Matrix& labels, Matrix& preds);

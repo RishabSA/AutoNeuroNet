@@ -3,26 +3,29 @@
 #include <vector>
 #include <utility>
 #include <cmath>
+#include <memory>
 
 class Var {
 public:
-    Var(double initial) {
-        val = initial;
-        visited = false;
-        gradVal = 0.0;
+    struct Node {
+        double val = 0.0;
+        double grad = 0.0;
+        int pending_children = 0;
+
+        // Have to use shared_ptr because it keeps each Node alive until no Var refers to it, allowing for intermediate/temporary Var objects
+        std::vector<std::pair<double, std::shared_ptr<Node>>> parents;
     };
+
+    Var();
+    Var(double initial);
 
     ~Var() = default;
 
-    double getVal() const { return val; };
-    void setVal(double v) {
-        val = v;
-    };
+    double getVal() const;
+    void setVal(double v);
 
-    double getGradVal() const { return gradVal; };
-    void setGradVal(double v) {
-        gradVal = v;
-    };
+    double getGrad() const;
+    void setGrad(double v);
 
     void resetGradAndParents();
 
@@ -66,8 +69,5 @@ public:
     void backward();
 
 private:
-    double val;
-    double gradVal;
-    bool visited;
-    std::vector<std::pair<double, Var*>> parents;
+    std::shared_ptr<Node> node;
 };
