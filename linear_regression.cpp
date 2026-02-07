@@ -21,7 +21,7 @@ int main () {
     }
 
     NeuralNetwork model({ std::make_tuple(in_dim, out_dim) });
-    double lr = 0.001;
+    double lr = 0.01;
     GradientDescentOptimizer optimizer(lr, &model);
     
     int epochs = 1000;
