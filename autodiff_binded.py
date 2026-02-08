@@ -1,7 +1,7 @@
-from build.autodiff import Var, Matrix
+from build.autoneuronet import Var, Matrix
 
 
-def autodiff_var_demo():
+def autoneuronet_var_demo():
     x0 = Var(5)
     x1 = Var(10)
 
@@ -16,7 +16,7 @@ def autodiff_var_demo():
     print(f"x1 = {x1}")
 
 
-def autodiff_matrix_demo():
+def autoneuronet_matrix_demo():
     mat1 = Matrix(5, 2)
     mat2 = Matrix(2, 4)
 
@@ -34,5 +34,5 @@ def autodiff_matrix_demo():
 
 
 if __name__ == "__main__":
-    autodiff_var_demo()
-    # autodiff_matrix_demo()
+    autoneuronet_var_demo()
+    # autoneuronet_matrix_demo()

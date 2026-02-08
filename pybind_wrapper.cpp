@@ -8,8 +8,8 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(autodiff, m) {
-    m.doc() = "Reverse-mode automatic differentiation scalar variable.";
+PYBIND11_MODULE(autoneuronet, m) {
+    m.doc() = "AutoNeuroNet is a library for automatic differentiation and neural networks.";
 
     py::class_<Var>(m, "Var", 
         R"doc(

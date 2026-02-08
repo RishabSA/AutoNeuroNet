@@ -18,7 +18,7 @@ execute_process(
 set(pybind11_DIR ${PYBIND11_CMAKE_DIR})
 find_package(pybind11 REQUIRED)
 
-pybind11_add_module(autodiff
+pybind11_add_module(autoneuronet
     pybind_wrapper.cpp
     src/Var.cpp
     src/Matrix.cpp
@@ -27,4 +27,4 @@ pybind11_add_module(autodiff
     src/LossFunctions.cpp
 )
 
-target_include_directories(autodiff PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(autoneuronet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
