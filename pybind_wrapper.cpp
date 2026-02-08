@@ -179,7 +179,7 @@ Base class for all layers.
     py::class_<Linear, Layer, std::shared_ptr<Linear>>(m, "Linear", R"doc(
 Linear layer
 )doc")
-        .def(py::init<int, int>(), py::arg("in_dim"), py::arg("out_dim"))
+        .def(py::init<int, int, std::string>(), py::arg("in_dim"), py::arg("out_dim"), py::arg("init") = "he")
         .def("forward", &Linear::forward, py::arg("input"))
         .def("optimizeWeights", &Linear::optimizeWeights, py::arg("learning_rate"))
         .def("resetGrad", &Linear::resetGrad)

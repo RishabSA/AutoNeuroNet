@@ -22,7 +22,8 @@ public:
     Matrix W;
     Matrix b;
 
-    Linear(int inDim, int outDim);
+    // init: "he" (default) or "xavier"
+    Linear(int inDim, int outDim, const std::string& init = "he");
 
     Matrix forward(Matrix& input) override;
 

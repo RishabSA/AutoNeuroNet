@@ -1,11 +1,36 @@
 #include "NeuralNetwork.hpp"
 
-Linear::Linear(int inDim, int outDim) {
+#include <cctype>
+#include <cmath>
+#include <random>
+
+void initWeights(Matrix& W, int fan_in, int fan_out, const std::string& init) {
+    double stddev = 0.0;
+    if (init == "xavier" || init == "glorot") {
+        stddev = std::sqrt(2.0 / static_cast<double>(fan_in + fan_out));
+    } else {
+        // default to He/Kaiming
+        stddev = std::sqrt(2.0 / static_cast<double>(fan_in));
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<double> dist(0.0, stddev);
+
+    for (int i = 0; i < W.rows; i++) {
+        for (int j = 0; j < W.cols; j++) {
+            W.data[i][j] = dist(gen);
+        }
+    }
+}
+
+
+Linear::Linear(int inDim, int outDim, const std::string& init) {
     name = "Linear(" + std::to_string(inDim) + ", " + std::to_string(outDim) + ")";
     trainable = true;
 
     W = Matrix(inDim, outDim);
-    W.randomInit();
+    initWeights(W, inDim, outDim, init);
 
     b = Matrix(1, outDim);
 }
