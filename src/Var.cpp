@@ -221,6 +221,72 @@ Var Var::exp() {
     return y;
 }
 
+
+Var Var::relu() {
+    Var y(node->val > 0.0 ? node->val : 0.0);
+
+    // ∂y/∂this = 1 if val > 0 else 0
+    y.node->parents.emplace_back(node->val > 0.0 ? 1.0 : 0.0, node);
+    node->pending_children += 1;
+
+    return y;
+}
+
+Var Var::leakyRelu(double alpha) {
+    Var y(node->val > 0.0 ? node->val : alpha * node->val);
+
+    // ∂y/∂this = 1 if val > 0 else alpha
+    y.node->parents.emplace_back(node->val > 0.0 ? 1.0 : alpha, node);
+    node->pending_children += 1;
+
+    return y;
+}
+
+Var Var::sigmoid() {
+    double simoid_val = 1.0 / (1.0 + std::exp(-node->val));
+    Var y(simoid_val);
+
+    // ∂y/∂this = s * (1 - s)
+    y.node->parents.emplace_back(simoid_val * (1.0 - simoid_val), node);
+    node->pending_children += 1;
+
+    return y;
+}
+
+Var Var::tanh() {
+    double tanh_val = std::tanh(node->val);
+    Var y(tanh_val);
+
+    // ∂y/∂this = 1 - tanh^2(val)
+    y.node->parents.emplace_back(1.0 - tanh_val * tanh_val, node);
+    node->pending_children += 1;
+
+    return y;
+}
+
+Var Var::silu() {
+    double silu_val = 1.0 / (1.0 + std::exp(-node->val));
+    Var y(node->val * silu_val);
+
+    // ∂y/∂this = silu_val + x * silu_val * (1 - silu_val)
+    double grad = silu_val + node->val * silu_val * (1.0 - silu_val);
+    y.node->parents.emplace_back(grad, node);
+    node->pending_children += 1;
+
+    return y;
+}
+
+Var Var::elu(double alpha) {
+    Var y(node->val > 0.0 ? node->val : alpha * (std::exp(node->val) - 1.0));
+
+    // ∂y/∂this = 1 if val > 0 else alpha * exp(val)
+    double grad = (node->val > 0.0) ? 1.0 : alpha * std::exp(node->val);
+    y.node->parents.emplace_back(grad, node);
+    node->pending_children += 1;
+
+    return y;
+}
+
 void Var::backward() {
     if (!node) {
         return;

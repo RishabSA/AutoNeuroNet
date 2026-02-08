@@ -66,6 +66,14 @@ public:
 
     Var exp();
 
+    // Activation functions
+    Var relu();
+    Var leakyRelu(double alpha = 0.01);
+    Var sigmoid();
+    Var tanh();
+    Var silu();
+    Var elu(double alpha = 1.0);
+
     void backward();
 
 private:

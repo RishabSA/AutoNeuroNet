@@ -1,83 +1,186 @@
 #include "NeuralNetwork.hpp"
 
-NeuralNetwork::NeuralNetwork(std::vector<std::pair<int, int>> l) {
-    // Input: vector of layers, each of (in_dim, out_dim)
+Linear::Linear(int inDim, int outDim) {
+    name = "Linear(" + std::to_string(inDim) + ", " + std::to_string(outDim) + ")";
+    trainable = true;
 
-    for (auto i : l) {
-        int in_dim = i.first;
-        int out_dim = i.second;
-
-        Matrix W = Matrix(in_dim, out_dim);
-        W.randomInit();
-
-        Matrix b = Matrix(1, out_dim);
-
-        layers.emplace_back(W, b);
-    }
-};
-
-std::vector<std::pair<Matrix, Matrix>>& NeuralNetwork::getLayers() {
-    return layers;
-}
-
-const std::vector<std::pair<Matrix, Matrix>>& NeuralNetwork::getLayers() const {
-    return layers;
-}
-
-void NeuralNetwork::addLayer(std::pair<int, int> l) {
-    // Input: layer with (in_dim, out_dim)
-    int in_dim = l.first;
-    int out_dim = l.second;
-
-    Matrix W = Matrix(in_dim, out_dim);
+    W = Matrix(inDim, outDim);
     W.randomInit();
 
-    Matrix b = Matrix(1, out_dim);
+    b = Matrix(1, outDim);
+}
 
-    layers.emplace_back(W, b);
-};
-
-Matrix NeuralNetwork::forward(const Matrix& input) {
-    Matrix output = input;
-
-    for (auto& layer : layers) {
-        Matrix& W = layer.first;
-        Matrix& b = layer.second;
-
-        output = matmul(output, W) + b;
-    }
-
+Matrix Linear::forward(Matrix& input) {
+    Matrix output = matmul(input, W) + b;
     return output;
 };
 
-void NeuralNetwork::optimizeLayerWeights(double learning_rate) {
+void Linear::optimizeWeights(double learning_rate) {
     // Backpropagation and Gradient Descent for each parameter
-    for (auto& layer : layers) {
-        Matrix& W = layer.first;
-        Matrix& b = layer.second;
 
-        // Update W
-        for (int i = 0; i < W.rows; i++) {
-            for (int j = 0; j < W.cols; j++) {
-                Var& weight_param = W.data[i][j];
+    // Update W
+    for (int i = 0; i < W.rows; i++) {
+        for (int j = 0; j < W.cols; j++) {
+            Var& weight_param = W.data[i][j];
 
-                // Partial derivative of the Loss function with respect to the weight parameter
-                double gradient = weight_param.getGrad();
-                weight_param.setVal(weight_param.getVal() - learning_rate * gradient);
-            }
-        }
-
-        // Update b
-        for (int i = 0; i < b.rows; i++) {
-            for (int j = 0; j < b.cols; j++) {
-                Var& bias_param = b.data[i][j];
-
-                // Partial derivative of the Loss function with respect to the bias parameter
-                double gradient = bias_param.getGrad();
-                bias_param.setVal(bias_param.getVal() - learning_rate * gradient);
-            }
+            // Partial derivative of the Loss function with respect to the weight parameter
+            double gradient = weight_param.getGrad();
+            weight_param.setVal(weight_param.getVal() - learning_rate * gradient);
         }
     }
+
+    // Update b
+    for (int i = 0; i < b.rows; i++) {
+        for (int j = 0; j < b.cols; j++) {
+            Var& bias_param = b.data[i][j];
+
+            // Partial derivative of the Loss function with respect to the bias parameter
+            double gradient = bias_param.getGrad();
+            bias_param.setVal(bias_param.getVal() - learning_rate * gradient);
+        }
+    }
+};
+
+void Linear::resetGrad() {
+    W.resetGradAndParents();
+    b.resetGradAndParents();
+};
+
+ReLU::ReLU() {
+    name = "ReLU()";
+    trainable = false;
+}
+
+Matrix ReLU::forward(Matrix& input) {
+    Matrix output = input.relu();
+    return output;
+};
+
+void ReLU::optimizeWeights(double learning_rate) {
+    (void)learning_rate;
+}
+
+void ReLU::resetGrad() {}
+
+LeakyReLU::LeakyReLU(double a) {
+    alpha = a;
+    name = "LeakyReLU(alpha=" + std::to_string(alpha) + ")";
+    trainable = false;
+}
+
+Matrix LeakyReLU::forward(Matrix& input) {
+    Matrix output = input.leakyRelu(alpha);
+    return output;
+};
+
+void LeakyReLU::optimizeWeights(double learning_rate) {
+    (void)learning_rate;
+}
+
+void LeakyReLU::resetGrad() {}
+
+Sigmoid::Sigmoid() {
+    name = "Sigmoid()";
+    trainable = false;
+}
+
+Matrix Sigmoid::forward(Matrix& input) {
+    Matrix output = input.sigmoid();
+    return output;
+};
+
+void Sigmoid::optimizeWeights(double learning_rate) {
+    (void)learning_rate;
+}
+
+void Sigmoid::resetGrad() {}
+
+Tanh::Tanh() {
+    name = "Tanh()";
+    trainable = false;
+}
+
+Matrix Tanh::forward(Matrix& input) {
+    Matrix output = input.tanh();
+    return output;
+};
+
+void Tanh::optimizeWeights(double learning_rate) {
+    (void)learning_rate;
+}
+
+void Tanh::resetGrad() {}
+
+SiLU::SiLU() {
+    name = "SiLU()";
+    trainable = false;
+}
+
+Matrix SiLU::forward(Matrix& input) {
+    Matrix output = input.silu();
+    return output;
+};
+
+void SiLU::optimizeWeights(double learning_rate) {
+    (void)learning_rate;
+}
+
+void SiLU::resetGrad() {}
+
+ELU::ELU(double a) {
+    alpha = a;
+    name = "ELU(alpha=" + std::to_string(alpha) + ")";
+    trainable = false;
+}
+
+Matrix ELU::forward(Matrix& input) {
+    Matrix output = input.elu(alpha);
+    return output;
+};
+
+void ELU::optimizeWeights(double learning_rate) {
+    (void)learning_rate;
+}
+
+void ELU::resetGrad() {}
+
+Softmax::Softmax() {
+    name = "Softmax()";
+    trainable = false;
+}
+
+Matrix Softmax::forward(Matrix& input) {
+    Matrix output = input.softmax();
+    return output;
+};
+
+void Softmax::optimizeWeights(double learning_rate) {
+    (void)learning_rate;
+}
+
+void Softmax::resetGrad() {}
+
+NeuralNetwork::NeuralNetwork(std::vector<std::shared_ptr<Layer>> network) {
+    layers = std::move(network);
+};
+
+std::vector<std::shared_ptr<Layer>> NeuralNetwork::getLayers() {
+    return layers;
+}
+
+const std::vector<std::shared_ptr<Layer>> NeuralNetwork::getLayers() const {
+    return layers;
+}
+
+void NeuralNetwork::addLayer(std::shared_ptr<Layer> layer) {
+    layers.push_back(std::move(layer));
+}
+
+Matrix NeuralNetwork::forward(Matrix input) {
+    for (auto& layer : layers) {
+        input = layer->forward(input);
+    }
+    return input;
 };
 
 std::string NeuralNetwork::getNetworkArchitecture() const {
@@ -85,14 +188,11 @@ std::string NeuralNetwork::getNetworkArchitecture() const {
         return "[]";
     }
 
-    std::string architecture = "[";
-    architecture += std::to_string(layers[0].first.rows);
+    std::string architecture = "";
 
-    for (const auto& layer : layers) {
-        architecture += " -> ";
-        architecture += std::to_string(layer.first.cols);
+    for (auto& layer : layers) {
+        architecture += layer->name + "\n";
     }
 
-    architecture += "]";
     return architecture;
 };

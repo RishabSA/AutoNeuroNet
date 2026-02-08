@@ -1,5 +1,10 @@
 #include "Matrix.hpp"
 
+Matrix::Matrix() {
+    rows = 0;
+    cols = 0;
+};
+
 Matrix::Matrix(int r, int c) {
     rows = r;
     cols = c;
@@ -76,6 +81,21 @@ Matrix Matrix::add(Matrix& other) {
                 Y.data[i][j] = data[i][j] + val;
             }
         }
+    } else if (other.rows == 1 && other.cols == cols) {
+        // Broadcast a row vector across rows
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Y.data[i][j] = data[i][j] + other.data[0][j];
+            }
+        }
+    } else if (other.cols == 1 && other.rows == rows) {
+        // Broadcast a column vector across columns
+        for (int i = 0; i < rows; i++) {
+            Var& val = other.data[i][0];
+            for (int j = 0; j < cols; j++) {
+                Y.data[i][j] = data[i][j] + val;
+            }
+        }
     } else {
         throw std::runtime_error("Dimension mismatch when attempting to add matrices");
     }
@@ -109,6 +129,21 @@ Matrix Matrix::subtract(Matrix& other) {
         // Broadcast the scalar for matrix addition when the other has shape (1, 1)
         Var& val = other.data[0][0];
         for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Y.data[i][j] = data[i][j] - val;
+            }
+        }
+    } else if (other.rows == 1 && other.cols == cols) {
+        // Broadcast a row vector across rows
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Y.data[i][j] = data[i][j] - other.data[0][j];
+            }
+        }
+    } else if (other.cols == 1 && other.rows == rows) {
+        // Broadcast a column vector across columns
+        for (int i = 0; i < rows; i++) {
+            Var& val = other.data[i][0];
             for (int j = 0; j < cols; j++) {
                 Y.data[i][j] = data[i][j] - val;
             }
@@ -198,6 +233,96 @@ Matrix Matrix::pow(int power) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = data[i][j].pow(power);
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::relu() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].relu();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::leakyRelu(double alpha) {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].leakyRelu(alpha);
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::sigmoid() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].sigmoid();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::tanh() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].tanh();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::silu() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].silu();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::elu(double alpha) {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].elu(alpha);
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::softmax() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        Var sum(0.0);
+        for (int j = 0; j < cols; j++) {
+            Var e = data[i][j].exp();
+            Y.data[i][j] = e;
+            sum = sum + e;
+        }
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = Y.data[i][j] / sum;
         }
     }
 

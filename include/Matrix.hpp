@@ -10,6 +10,8 @@ public:
     int rows, cols;
     std::vector<std::vector<Var>> data;
 
+    Matrix();
+
     Matrix(int r, int c);
 
     Var& operator()(int row, int col) {
@@ -44,6 +46,14 @@ public:
     Matrix operator/(double other) { return divide(other); };
 
     Matrix pow(int power);
+
+    Matrix relu();
+    Matrix leakyRelu(double alpha = 0.01);
+    Matrix sigmoid();
+    Matrix tanh();
+    Matrix silu();
+    Matrix elu(double alpha = 1.0);
+    Matrix softmax();
 };
 
 Matrix matmul(Matrix& X0, Matrix& X1);

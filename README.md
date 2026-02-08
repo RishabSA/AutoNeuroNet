@@ -1,4 +1,4 @@
-# Automatic Differentiation
+# AutoNeuroNet - Automatic Differentiation and Neural Networks
 
 ## Setup
 

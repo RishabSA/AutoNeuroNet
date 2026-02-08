@@ -59,9 +59,16 @@ after setting its gradient to 1.0 to accumulate gradients.
         .def("sin", &Var::sin)
         .def("cos", &Var::cos)
         .def("tan", &Var::tan)
+        .def("tanh", &Var::tanh)
         .def("sec", &Var::sec)
         .def("csc", &Var::csc)
         .def("cot", &Var::cot)
+
+        .def("relu", &Var::relu)
+        .def("leakyRelu", &Var::leakyRelu, py::arg("alpha") = 0.01)
+        .def("sigmoid", &Var::sigmoid)
+        .def("silu", &Var::silu)
+        .def("elu", &Var::elu, py::arg("alpha") = 1.0)
 
         .def("log", &Var::log)
         .def("exp", &Var::exp)
@@ -151,21 +158,72 @@ A matrix of Var objects.
         .def("pow", &Matrix::pow, py::arg("power"))
         .def("__pow__", [](Matrix &A, int p) { return A.pow(p); }, py::is_operator(), py::arg("power"))
 
+        .def("relu", &Matrix::relu)
+        .def("leakyRelu", &Matrix::leakyRelu, py::arg("alpha") = 0.01)
+        .def("tanh", &Matrix::tanh)
+        .def("sigmoid", &Matrix::sigmoid)
+        .def("silu", &Matrix::silu)
+        .def("elu", &Matrix::elu, py::arg("alpha") = 1.0)
+        .def("softmax", &Matrix::softmax)
+
         .def("__repr__", [](const Matrix &M) {
             return "Matrix(" + std::to_string(M.rows) + " x " + std::to_string(M.cols) + ") = \n" + M.getValsMatrix();
         });
 
+    py::class_<Layer, std::shared_ptr<Layer>>(m, "Layer", R"doc(
+Base class for all layers.
+)doc")
+        .def_property_readonly("name", [](const Layer& layer) { return layer.name; })
+        .def_property_readonly("trainable", [](const Layer& layer) { return layer.trainable; });
+
+    py::class_<Linear, Layer, std::shared_ptr<Linear>>(m, "Linear", R"doc(
+Linear layer
+)doc")
+        .def(py::init<int, int>(), py::arg("in_dim"), py::arg("out_dim"))
+        .def("forward", &Linear::forward, py::arg("input"))
+        .def("optimizeWeights", &Linear::optimizeWeights, py::arg("learning_rate"))
+        .def("resetGrad", &Linear::resetGrad)
+        .def_readonly("W", &Linear::W)
+        .def_readonly("b", &Linear::b);
+
+    py::class_<ReLU, Layer, std::shared_ptr<ReLU>>(m, "ReLU")
+        .def(py::init<>())
+        .def("forward", &ReLU::forward, py::arg("input"));
+
+    py::class_<LeakyReLU, Layer, std::shared_ptr<LeakyReLU>>(m, "LeakyReLU")
+        .def(py::init<double>(), py::arg("alpha"))
+        .def("forward", &LeakyReLU::forward, py::arg("input"));
+
+    py::class_<Sigmoid, Layer, std::shared_ptr<Sigmoid>>(m, "Sigmoid")
+        .def(py::init<>())
+        .def("forward", &Sigmoid::forward, py::arg("input"));
+
+    py::class_<Tanh, Layer, std::shared_ptr<Tanh>>(m, "Tanh")
+        .def(py::init<>())
+        .def("forward", &Tanh::forward, py::arg("input"));
+
+    py::class_<SiLU, Layer, std::shared_ptr<SiLU>>(m, "SiLU")
+        .def(py::init<>())
+        .def("forward", &SiLU::forward, py::arg("input"));
+
+    py::class_<ELU, Layer, std::shared_ptr<ELU>>(m, "ELU")
+        .def(py::init<double>(), py::arg("alpha"))
+        .def("forward", &ELU::forward, py::arg("input"));
+
+    py::class_<Softmax, Layer, std::shared_ptr<Softmax>>(m, "Softmax")
+        .def(py::init<>())
+        .def("forward", &Softmax::forward, py::arg("input"));
+
     py::class_<NeuralNetwork>(m, "NeuralNetwork", R"doc(
 A simple feed-forward neural network built from Matrix layers.
 )doc")
-        .def(py::init<std::vector<std::pair<int, int>>>(), py::arg("layers"))
+        .def(py::init<std::vector<std::shared_ptr<Layer>>>(), py::arg("layers"))
 
-        .def("getLayers", py::overload_cast<>(&NeuralNetwork::getLayers, py::const_), py::return_value_policy::reference_internal)
-        .def_property_readonly("layers", py::overload_cast<>(&NeuralNetwork::getLayers, py::const_), py::return_value_policy::reference_internal)
+        .def("getLayers", py::overload_cast<>(&NeuralNetwork::getLayers, py::const_))
+        .def_property_readonly("layers", py::overload_cast<>(&NeuralNetwork::getLayers, py::const_))
 
         .def("addLayer", &NeuralNetwork::addLayer, py::arg("layer"))
         .def("forward", &NeuralNetwork::forward, py::arg("input"))
-        .def("optimizeLayerWeights", &NeuralNetwork::optimizeLayerWeights, py::arg("learning_rate"))
         .def("getNetworkArchitecture", &NeuralNetwork::getNetworkArchitecture)
         
         .def("__repr__", [](const NeuralNetwork &model) {
@@ -175,10 +233,21 @@ A simple feed-forward neural network built from Matrix layers.
     py::class_<GradientDescentOptimizer>(m, "GradientDescentOptimizer", R"doc(
 Simple gradient descent optimizer for a NeuralNetwork.
 )doc")
-        .def(py::init<double, NeuralNetwork*>(), py::arg("learning_rate"), py::arg("model"))
+        .def(py::init<double, NeuralNetwork*>(), py::arg("learning_rate"), py::arg("model"), py::keep_alive<1, 2>())
         .def("optimizeModelWeights", &GradientDescentOptimizer::optimizeModelWeights)
         .def("resetGrad", &GradientDescentOptimizer::resetGrad);
 
     m.def("matmul", &matmul, py::arg("A"), py::arg("B"));
     m.def("MSELoss", &MSELoss, py::arg("labels"), py::arg("preds"));
+    m.def("BCELoss", &BCELoss, py::arg("labels"), py::arg("preds"), py::arg("eps") = 1e-7);
+
+    py::module_ ops = m.def_submodule("ops");
+    ops.def("sin", [](Var& v) { return v.sin(); }, py::arg("var"));
+    ops.def("cos", [](Var& v) { return v.cos(); }, py::arg("var"));
+    ops.def("tan", [](Var& v) { return v.tan(); }, py::arg("var"));
+    ops.def("sec", [](Var& v) { return v.sec(); }, py::arg("var"));
+    ops.def("csc", [](Var& v) { return v.csc(); }, py::arg("var"));
+    ops.def("cot", [](Var& v) { return v.cot(); }, py::arg("var"));
+    ops.def("log", [](Var& v) { return v.log(); }, py::arg("var"));
+    ops.def("exp", [](Var& v) { return v.exp(); }, py::arg("var"));
 }
