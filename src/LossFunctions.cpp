@@ -2,7 +2,7 @@
 
 Var MSELoss(Matrix& labels, Matrix& preds) {
     if (labels.rows != preds.rows || labels.cols != preds.cols) {
-        throw std::runtime_error("Dimension mismatch when attempting to compute loss");
+        throw std::runtime_error("Dimension mismatch when attempting to compute loss - labels: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ") preds: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ")");
     }
 
     Var loss(0.0);
@@ -23,7 +23,7 @@ Var MSELoss(Matrix& labels, Matrix& preds) {
 
 Var MAELoss(Matrix& labels, Matrix& preds) {
     if (labels.rows != preds.rows || labels.cols != preds.cols) {
-        throw std::runtime_error("Dimension mismatch when attempting to compute loss");
+        throw std::runtime_error("Dimension mismatch when attempting to compute loss - labels: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ") preds: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ")");
     }
 
     Var loss(0.0);
@@ -44,7 +44,7 @@ Var MAELoss(Matrix& labels, Matrix& preds) {
 
 Var BCELoss(Matrix& labels, Matrix& preds, double eps) {
     if (labels.rows != preds.rows || labels.cols != preds.cols) {
-        throw std::runtime_error("Dimension mismatch when attempting to compute loss");
+        throw std::runtime_error("Dimension mismatch when attempting to compute loss - labels: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ") preds: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ")");
     }
 
     Var loss(0.0);

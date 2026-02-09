@@ -97,7 +97,7 @@ Matrix Matrix::add(Matrix& other) {
             }
         }
     } else {
-        throw std::runtime_error("Dimension mismatch when attempting to add matrices");
+        throw std::runtime_error("Dimension mismatch when attempting to add matrices - (" + std::to_string(rows) + ", " + std::to_string(cols) + ") + (" + std::to_string(other.rows) + ", " + std::to_string(other.cols) + ")");
     }
 
     return Y;
@@ -149,7 +149,7 @@ Matrix Matrix::subtract(Matrix& other) {
             }
         }
     } else {
-        throw std::runtime_error("Dimension mismatch when attempting to add matrices");
+        throw std::runtime_error("Dimension mismatch when attempting to add matrices - (" + std::to_string(rows) + ", " + std::to_string(cols) + ") + (" + std::to_string(other.rows) + ", " + std::to_string(other.cols) + ")");
     }
 
     return Y;

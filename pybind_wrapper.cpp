@@ -8,10 +8,15 @@
 
 namespace py = pybind11;
 
+static int normalize_index(int idx, int size) {
+    if (idx < 0) idx += size;
+    return idx;
+}
+
 PYBIND11_MODULE(autoneuronet, m) {
     m.doc() = "AutoNeuroNet is a library for automatic differentiation and neural networks.";
 
-    py::class_<Var>(m, "Var", 
+    py::class_<Var>(m, "Var",
         R"doc(
 A scalar value used for reverse-mode automatic differentiation.
 
@@ -91,16 +96,46 @@ A matrix of Var objects.
         .def_readonly("rows", &Matrix::rows)
         .def_readonly("cols", &Matrix::cols)
 
+        .def("__getitem__", [](Matrix &M, int i) {
+                int normalized_i = normalize_index(i, M.rows);
+                if (normalized_i < 0 || normalized_i >= M.rows) throw std::out_of_range("Matrix row index " + std::to_string(i) + " out of range");
+
+                Matrix row(1, M.cols);
+
+                for (int j = 0; j < M.cols; j++) {
+                    row(0, j) = M(normalized_i, j);
+                }
+
+                return row;
+            })
+
+        .def("__setitem__", [](Matrix &M, int i, py::sequence seq) {
+                int normalized_i = normalize_index(i, M.rows);
+                if (normalized_i < 0 || normalized_i >= M.rows) throw std::out_of_range("Matrix row index " + std::to_string(i) + " out of range");
+                if (seq.size() != M.cols) throw std::runtime_error("Row size mismatch: " + std::to_string(seq.size()) + " is not equal to " + std::to_string(M.cols));
+
+                for (int j = 0; j < M.cols; j++) {
+                    py::handle item = seq[j];
+
+                    if (py::isinstance<Var>(item)) {
+                        M(normalized_i, j) = item.cast<Var>();
+                    } else {
+                        M(normalized_i, j) = Var(item.cast<double>());
+                    }
+                }
+            }, py::arg("index"), py::arg("value"))
+        
         .def("__getitem__", [](Matrix &M, py::tuple idx) -> Var& {
                 if (idx.size() != 2) throw std::runtime_error("Use M[i, j]");
 
                 int i = idx[0].cast<int>();
                 int j = idx[1].cast<int>();
+                int normalized_i = normalize_index(i, M.rows);
+                int normalized_j = normalize_index(i, M.cols);
 
-                if (i < 0 || i >= M.rows || j < 0 || j >= M.cols)
-                    throw std::out_of_range("Matrix index out of range");
+                if (normalized_i < 0 || normalized_i >= M.rows || normalized_j < 0 || normalized_j >= M.cols) throw std::out_of_range("Matrix indices " + std::to_string(i) + " and " + std::to_string(j) + " out of range");
 
-                return M(i, j);
+                return M(normalized_i, normalized_j);
             },
             py::return_value_policy::reference_internal)
 
@@ -109,11 +144,12 @@ A matrix of Var objects.
 
                 int i = idx[0].cast<int>();
                 int j = idx[1].cast<int>();
+                int normalized_i = normalize_index(i, M.rows);
+                int normalized_j = normalize_index(i, M.cols);
 
-                if (i < 0 || i >= M.rows || j < 0 || j >= M.cols)
-                    throw std::out_of_range("Matrix index out of range");
+                if (normalized_i < 0 || normalized_i >= M.rows || normalized_j < 0 || normalized_j >= M.cols) throw std::out_of_range("Matrix indices " + std::to_string(i) + " and " + std::to_string(j) + " out of range");
                     
-                M(i, j) = Var(v);
+                M(normalized_i, normalized_j) = Var(v);
             },
             py::arg("index"), py::arg("value"))
         .def("__setitem__", [](Matrix &M, py::tuple idx, const Var &v) {
@@ -121,11 +157,12 @@ A matrix of Var objects.
 
                 int i = idx[0].cast<int>();
                 int j = idx[1].cast<int>();
+                int normalized_i = normalize_index(i, M.rows);
+                int normalized_j = normalize_index(i, M.cols);
 
-                if (i < 0 || i >= M.rows || j < 0 || j >= M.cols)
-                    throw std::out_of_range("Matrix index out of range");
+                if (normalized_i < 0 || normalized_i >= M.rows || normalized_j < 0 || normalized_j >= M.cols) throw std::out_of_range("Matrix indices " + std::to_string(i) + " and " + std::to_string(j) + " out of range");
 
-                M(i, j) = v;
+                M(normalized_i, normalized_j) = v;
             },
             py::arg("index"), py::arg("value"))
 
@@ -245,14 +282,14 @@ Simple gradient descent optimizer for a NeuralNetwork.
     m.def("MAELoss", &MAELoss, py::arg("labels"), py::arg("preds"));
     m.def("BCELoss", &BCELoss, py::arg("labels"), py::arg("preds"), py::arg("eps") = 1e-7);
 
-    py::module_ ops = m.def_submodule("ops");
-    ops.def("sin", [](Var& v) { return v.sin(); }, py::arg("var"));
-    ops.def("cos", [](Var& v) { return v.cos(); }, py::arg("var"));
-    ops.def("tan", [](Var& v) { return v.tan(); }, py::arg("var"));
-    ops.def("sec", [](Var& v) { return v.sec(); }, py::arg("var"));
-    ops.def("csc", [](Var& v) { return v.csc(); }, py::arg("var"));
-    ops.def("cot", [](Var& v) { return v.cot(); }, py::arg("var"));
-    ops.def("log", [](Var& v) { return v.log(); }, py::arg("var"));
-    ops.def("exp", [](Var& v) { return v.exp(); }, py::arg("var"));
-    ops.def("abs", [](Var& v) { return v.abs(); }, py::arg("var"));
+    py::module_ operations = m.def_submodule("operations");
+    operations.def("sin", [](Var& v) { return v.sin(); }, py::arg("var"));
+    operations.def("cos", [](Var& v) { return v.cos(); }, py::arg("var"));
+    operations.def("tan", [](Var& v) { return v.tan(); }, py::arg("var"));
+    operations.def("sec", [](Var& v) { return v.sec(); }, py::arg("var"));
+    operations.def("csc", [](Var& v) { return v.csc(); }, py::arg("var"));
+    operations.def("cot", [](Var& v) { return v.cot(); }, py::arg("var"));
+    operations.def("log", [](Var& v) { return v.log(); }, py::arg("var"));
+    operations.def("exp", [](Var& v) { return v.exp(); }, py::arg("var"));
+    operations.def("abs", [](Var& v) { return v.abs(); }, py::arg("var"));
 }
