@@ -239,6 +239,115 @@ Matrix Matrix::pow(int power) {
     return Y;
 };
 
+Matrix Matrix::sin() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].sin();
+        }
+    }
+
+    return Y;
+};
+
+
+Matrix Matrix::cos() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].cos();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::tan() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].tan();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::sec() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].sec();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::csc() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].csc();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::cot() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].cot();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::log() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].log();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::exp() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].exp();
+        }
+    }
+
+    return Y;
+};
+
+Matrix Matrix::abs() {
+    Matrix Y(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].abs();
+        }
+    }
+
+    return Y;
+};
+
 Matrix Matrix::relu() {
     Matrix Y(rows, cols);
 

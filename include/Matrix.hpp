@@ -47,6 +47,19 @@ public:
 
     Matrix pow(int power);
 
+    Matrix sin();
+    Matrix cos();
+    Matrix tan();
+    Matrix sec();
+    Matrix csc();
+    Matrix cot();
+
+    Matrix log();
+
+    Matrix exp();
+
+    Matrix abs();
+
     Matrix relu();
     Matrix leakyRelu(double alpha = 0.01);
     Matrix sigmoid();

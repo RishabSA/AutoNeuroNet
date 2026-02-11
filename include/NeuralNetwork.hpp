@@ -2,6 +2,11 @@
 
 #include <vector>
 #include <utility>
+#include <cctype>
+#include <cmath>
+#include <random>
+#include <fstream>
+
 #include "Matrix.hpp"
 
 class Layer {
@@ -112,4 +117,7 @@ public:
     Matrix forward(Matrix input);
 
     std::string getNetworkArchitecture() const;
+
+    void saveWeights(const std::string& path);
+    void loadWeights(const std::string& path);
 };

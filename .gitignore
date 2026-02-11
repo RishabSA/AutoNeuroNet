@@ -1,4 +1,8 @@
+# Custom
 build/
+models/
+data/
+
 .vscode
 
 # Prerequisites

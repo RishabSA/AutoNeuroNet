@@ -76,3 +76,32 @@ Var BCELoss(Matrix& labels, Matrix& preds, double eps) {
 
     return loss;
 };
+
+Var CrossEntropyLoss(Matrix& labels, Matrix& preds, double eps) {
+    if (labels.rows != preds.rows) {
+        throw std::runtime_error("Dimension mismatch in CrossEntropyLoss - labels rows: (" + std::to_string(labels.rows) + ") preds rows: (" + std::to_string(preds.rows) + ")");
+    }
+    
+    if (labels.cols != 1) {
+        throw std::runtime_error("CrossEntropyLoss expects labels shape (N, 1) with class indices");
+    }
+
+    Var loss(0.0);
+
+    for (int i = 0; i < labels.rows; i++) {
+        int cls = static_cast<int>(labels.data[i][0].getVal());
+        if (cls < 0 || cls >= preds.cols) {
+            throw std::runtime_error("CrossEntropyLoss class index out of range at row " + std::to_string(i));
+        }
+
+        Var p = preds.data[i][cls];
+        Var p_eps = p + eps;
+        Var logp = p_eps.log();
+        loss = loss - logp;
+    }
+
+    Var denom(labels.rows);
+    loss = loss / denom;
+
+    return loss;
+}

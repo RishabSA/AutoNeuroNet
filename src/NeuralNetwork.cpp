@@ -1,9 +1,5 @@
 #include "NeuralNetwork.hpp"
 
-#include <cctype>
-#include <cmath>
-#include <random>
-
 void initWeights(Matrix& W, int fan_in, int fan_out, const std::string& init) {
     double stddev = 0.0;
     if (init == "xavier" || init == "glorot") {
@@ -221,3 +217,82 @@ std::string NeuralNetwork::getNetworkArchitecture() const {
 
     return architecture;
 };
+
+void NeuralNetwork::saveWeights(const std::string& path) {
+    std::ofstream out(path, std::ios::binary);
+    if (!out) throw std::runtime_error("Failed to open file");
+
+    uint32_t num = static_cast<uint32_t>(layers.size());
+    out.write(reinterpret_cast<char*>(&num), sizeof(num));
+
+    for (auto& layer : layers) {
+        auto linear = std::dynamic_pointer_cast<Linear>(layer);
+        if (!linear) continue;
+
+        int rows = linear->W.rows;
+        int cols = linear->W.cols;
+        out.write(reinterpret_cast<char*>(&rows), sizeof(rows));
+        out.write(reinterpret_cast<char*>(&cols), sizeof(cols));
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                double v = linear->W.data[i][j].getVal();
+                out.write(reinterpret_cast<char*>(&v), sizeof(v));
+            }
+        }
+
+        int brow = linear->b.rows, bcol = linear->b.cols;
+        out.write(reinterpret_cast<char*>(&brow), sizeof(brow));
+        out.write(reinterpret_cast<char*>(&bcol), sizeof(bcol));
+
+        for (int i = 0; i < brow; i++) {
+            for (int j = 0; j < bcol; j++) {
+                double v = linear->b.data[i][j].getVal();
+                out.write(reinterpret_cast<char*>(&v), sizeof(v));
+            }
+        }
+    }
+}
+
+void NeuralNetwork::loadWeights(const std::string& path) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) throw std::runtime_error("Failed to open file");
+
+    uint32_t num = 0;
+    in.read(reinterpret_cast<char*>(&num), sizeof(num));
+
+    for (auto& layer : layers) {
+        auto linear = std::dynamic_pointer_cast<Linear>(layer);
+        if (!linear) continue;
+
+        int rows, cols;
+        in.read(reinterpret_cast<char*>(&rows), sizeof(rows));
+        in.read(reinterpret_cast<char*>(&cols), sizeof(cols));
+
+        if (rows != linear->W.rows || cols != linear->W.cols)
+            throw std::runtime_error("Weight shape mismatch");
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                double v;
+                in.read(reinterpret_cast<char*>(&v), sizeof(v));
+                linear->W.data[i][j].setVal(v);
+            }
+        }
+
+        int brow, bcol;
+        in.read(reinterpret_cast<char*>(&brow), sizeof(brow));
+        in.read(reinterpret_cast<char*>(&bcol), sizeof(bcol));
+
+        if (brow != linear->b.rows || bcol != linear->b.cols)
+            throw std::runtime_error("Bias shape mismatch");
+
+        for (int i = 0; i < brow; ++i) {
+            for (int j = 0; j < bcol; ++j) {
+                double v;
+                in.read(reinterpret_cast<char*>(&v), sizeof(v));
+                linear->b.data[i][j].setVal(v);
+            }
+        }
+    }
+}

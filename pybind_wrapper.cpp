@@ -64,22 +64,22 @@ after setting its gradient to 1.0 to accumulate gradients.
         .def("sin", &Var::sin)
         .def("cos", &Var::cos)
         .def("tan", &Var::tan)
-        .def("tanh", &Var::tanh)
         .def("sec", &Var::sec)
         .def("csc", &Var::csc)
         .def("cot", &Var::cot)
-
-        .def("relu", &Var::relu)
-        .def("leakyRelu", &Var::leakyRelu, py::arg("alpha") = 0.01)
-        .def("sigmoid", &Var::sigmoid)
-        .def("silu", &Var::silu)
-        .def("elu", &Var::elu, py::arg("alpha") = 1.0)
 
         .def("log", &Var::log)
 
         .def("exp", &Var::exp)
 
         .def("abs", &Var::abs)
+
+        .def("relu", &Var::relu)
+        .def("leakyRelu", &Var::leakyRelu, py::arg("alpha") = 0.01)
+        .def("tanh", &Var::tanh)
+        .def("sigmoid", &Var::sigmoid)
+        .def("silu", &Var::silu)
+        .def("elu", &Var::elu, py::arg("alpha") = 1.0)
 
         .def("resetGradAndParents", &Var::resetGradAndParents)
         .def("backward", &Var::backward)
@@ -131,7 +131,7 @@ A matrix of Var objects.
                 int i = idx[0].cast<int>();
                 int j = idx[1].cast<int>();
                 int normalized_i = normalize_index(i, M.rows);
-                int normalized_j = normalize_index(i, M.cols);
+                int normalized_j = normalize_index(j, M.cols);
 
                 if (normalized_i < 0 || normalized_i >= M.rows || normalized_j < 0 || normalized_j >= M.cols) throw std::out_of_range("Matrix indices " + std::to_string(i) + " and " + std::to_string(j) + " out of range");
 
@@ -145,7 +145,7 @@ A matrix of Var objects.
                 int i = idx[0].cast<int>();
                 int j = idx[1].cast<int>();
                 int normalized_i = normalize_index(i, M.rows);
-                int normalized_j = normalize_index(i, M.cols);
+                int normalized_j = normalize_index(j, M.cols);
 
                 if (normalized_i < 0 || normalized_i >= M.rows || normalized_j < 0 || normalized_j >= M.cols) throw std::out_of_range("Matrix indices " + std::to_string(i) + " and " + std::to_string(j) + " out of range");
                     
@@ -158,7 +158,7 @@ A matrix of Var objects.
                 int i = idx[0].cast<int>();
                 int j = idx[1].cast<int>();
                 int normalized_i = normalize_index(i, M.rows);
-                int normalized_j = normalize_index(i, M.cols);
+                int normalized_j = normalize_index(j, M.cols);
 
                 if (normalized_i < 0 || normalized_i >= M.rows || normalized_j < 0 || normalized_j >= M.cols) throw std::out_of_range("Matrix indices " + std::to_string(i) + " and " + std::to_string(j) + " out of range");
 
@@ -197,6 +197,19 @@ A matrix of Var objects.
 
         .def("pow", &Matrix::pow, py::arg("power"))
         .def("__pow__", [](Matrix &A, int p) { return A.pow(p); }, py::is_operator(), py::arg("power"))
+
+        .def("sin", &Matrix::sin)
+        .def("cos", &Matrix::cos)
+        .def("tan", &Matrix::tan)
+        .def("sec", &Matrix::sec)
+        .def("csc", &Matrix::csc)
+        .def("cot", &Matrix::cot)
+
+        .def("log", &Matrix::log)
+
+        .def("exp", &Matrix::exp)
+
+        .def("abs", &Matrix::abs)
 
         .def("relu", &Matrix::relu)
         .def("leakyRelu", &Matrix::leakyRelu, py::arg("alpha") = 0.01)
@@ -265,22 +278,39 @@ A simple feed-forward neural network built from Matrix layers.
         .def("addLayer", &NeuralNetwork::addLayer, py::arg("layer"))
         .def("forward", &NeuralNetwork::forward, py::arg("input"))
         .def("getNetworkArchitecture", &NeuralNetwork::getNetworkArchitecture)
+
+        .def("saveWeights", &NeuralNetwork::saveWeights, py::arg("path"))
+        .def("loadWeights", &NeuralNetwork::loadWeights, py::arg("path"))
         
         .def("__repr__", [](const NeuralNetwork &model) {
             return "NeuralNetwork =\n" + model.getNetworkArchitecture();
         });
 
-    py::class_<GradientDescentOptimizer>(m, "GradientDescentOptimizer", R"doc(
+    py::class_<Optimizer>(m, "Optimizer", R"doc(
+Base class for all optimizers for a NeuralNetwork.
+)doc")
+        .def("optimize", &Optimizer::optimize)
+        .def("resetGrad", &Optimizer::resetGrad);
+
+    py::class_<GradientDescentOptimizer, Optimizer>(m, "GradientDescentOptimizer", R"doc(
 Simple gradient descent optimizer for a NeuralNetwork.
 )doc")
         .def(py::init<double, NeuralNetwork*>(), py::arg("learning_rate"), py::arg("model"), py::keep_alive<1, 2>())
         .def("optimize", &GradientDescentOptimizer::optimize)
         .def("resetGrad", &GradientDescentOptimizer::resetGrad);
 
+    py::class_<SGDOptimizer, Optimizer>(m, "SGDOptimizer", R"doc(
+Stochastic gradient descent optimizer with momentum/weight decay.
+)doc")
+        .def(py::init<double, NeuralNetwork*, double, double>(), py::arg("learning_rate"), py::arg("model"), py::arg("momentum") = 0.0, py::arg("weight_decay") = 0.0, py::keep_alive<1, 2>())
+        .def("optimize", &SGDOptimizer::optimize)
+        .def("resetGrad", &SGDOptimizer::resetGrad);
+
     m.def("matmul", &matmul, py::arg("A"), py::arg("B"));
     m.def("MSELoss", &MSELoss, py::arg("labels"), py::arg("preds"));
     m.def("MAELoss", &MAELoss, py::arg("labels"), py::arg("preds"));
     m.def("BCELoss", &BCELoss, py::arg("labels"), py::arg("preds"), py::arg("eps") = 1e-7);
+    m.def("CrossEntropyLoss", &CrossEntropyLoss, py::arg("labels"), py::arg("preds"), py::arg("eps") = 1e-9);
 
     py::module_ operations = m.def_submodule("operations");
     operations.def("sin", [](Var& v) { return v.sin(); }, py::arg("var"));
