@@ -58,7 +58,7 @@ void SGDOptimizer::optimize() {
         initVelocities();
     }
 
-    for (size_t idx = 0; idx < linear_layers.size(); idx++) {
+    for (int idx = 0; idx < linear_layers.size(); idx++) {
         Linear* layer = linear_layers[idx];
         Velocity& v = velocities[idx];
 
@@ -81,7 +81,7 @@ void SGDOptimizer::optimize() {
             }
         }
 
-        // Update b (no weight decay by default)
+        // Update b
         for (int i = 0; i < layer->b.rows; i++) {
             for (int j = 0; j < layer->b.cols; j++) {
                 Var& bias_param = layer->b.data[i][j];

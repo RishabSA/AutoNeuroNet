@@ -1,3 +1,4 @@
+torchvision
 numpy
 matplotlib
 sklearn

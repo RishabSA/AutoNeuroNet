@@ -81,7 +81,7 @@ Var CrossEntropyLoss(Matrix& labels, Matrix& preds, double eps) {
     if (labels.rows != preds.rows) {
         throw std::runtime_error("Dimension mismatch in CrossEntropyLoss - labels rows: (" + std::to_string(labels.rows) + ") preds rows: (" + std::to_string(preds.rows) + ")");
     }
-    
+
     if (labels.cols != 1) {
         throw std::runtime_error("CrossEntropyLoss expects labels shape (N, 1) with class indices");
     }
@@ -100,8 +100,40 @@ Var CrossEntropyLoss(Matrix& labels, Matrix& preds, double eps) {
         loss = loss - logp;
     }
 
-    Var denom(labels.rows);
-    loss = loss / denom;
+    Var rows(labels.rows);
+    loss = loss / rows;
+
+    return loss;
+}
+
+Var CrossEntropyLossWithLogits(Matrix& labels, Matrix& logits, double eps) {
+    if (labels.rows != logits.rows) { /* ... */ }
+    if (labels.cols != 1) { /* ... */ }
+
+    Var loss(0.0);
+
+    for (int i = 0; i < labels.rows; i++) {
+        int cls = static_cast<int>(labels.data[i][0].getVal());
+        if (cls < 0 || cls >= logits.cols) { /* ... */ }
+
+        double row_max = logits.data[i][0].getVal();
+        for (int j = 1; j < logits.cols; j++) {
+            row_max = std::max(row_max, logits.data[i][j].getVal());
+        }
+
+        Var sum(0.0);
+        for (int j = 0; j < logits.cols; j++) {
+            Var e((logits.data[i][j] - row_max).exp());
+            sum = sum + e;
+        }
+
+        Var logsumexp = sum.log() + row_max;
+        Var logp = logits.data[i][cls] - logsumexp;
+        loss = loss - logp;
+    }
+
+    Var rows(labels.rows);
+    loss = loss / rows;
 
     return loss;
 }

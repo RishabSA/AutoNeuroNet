@@ -311,6 +311,7 @@ Stochastic gradient descent optimizer with momentum/weight decay.
     m.def("MAELoss", &MAELoss, py::arg("labels"), py::arg("preds"));
     m.def("BCELoss", &BCELoss, py::arg("labels"), py::arg("preds"), py::arg("eps") = 1e-7);
     m.def("CrossEntropyLoss", &CrossEntropyLoss, py::arg("labels"), py::arg("preds"), py::arg("eps") = 1e-9);
+    m.def("CrossEntropyLossWithLogits", &CrossEntropyLossWithLogits, py::arg("labels"), py::arg("logits"), py::arg("eps") = 1e-9);
 
     py::module_ operations = m.def_submodule("operations");
     operations.def("sin", [](Var& v) { return v.sin(); }, py::arg("var"));

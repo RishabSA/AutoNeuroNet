@@ -424,16 +424,21 @@ Matrix Matrix::softmax() {
     Matrix Y(rows, cols);
 
     for (int i = 0; i < rows; i++) {
+        double row_max = data[i][0].getVal();
+        for (int j = 1; j < cols; j++) {
+            row_max = std::max(row_max, data[i][j].getVal());
+        }
+
         Var sum(0.0);
         for (int j = 0; j < cols; j++) {
-            Var e = data[i][j].exp();
+            Var e = (data[i][j] - row_max).exp();
             Y.data[i][j] = e;
             sum = sum + e;
         }
+
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = Y.data[i][j] / sum;
         }
     }
-
     return Y;
-};
+}
