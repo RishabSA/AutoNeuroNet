@@ -1,8 +1,8 @@
 # cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 # cmake --build build
 
-cmake_minimum_required(VERSION 4.1)
-project(automatic_differentiation)
+cmake_minimum_required(VERSION 3.20)
+project(AutoNeuroNet)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,7 +18,7 @@ execute_process(
 set(pybind11_DIR ${PYBIND11_CMAKE_DIR})
 find_package(pybind11 REQUIRED)
 
-pybind11_add_module(autoneuronet
+pybind11_add_module(_autoneuronet
     pybind_wrapper.cpp
     src/Var.cpp
     src/Matrix.cpp
@@ -27,4 +27,10 @@ pybind11_add_module(autoneuronet
     src/LossFunctions.cpp
 )
 
-target_include_directories(autoneuronet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(_autoneuronet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+install(TARGETS _autoneuronet
+    LIBRARY DESTINATION autoneuronet
+    ARCHIVE DESTINATION autoneuronet
+    RUNTIME DESTINATION autoneuronet
+)

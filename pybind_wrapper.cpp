@@ -13,7 +13,7 @@ static int normalize_index(int idx, int size) {
     return idx;
 }
 
-PYBIND11_MODULE(autoneuronet, m) {
+PYBIND11_MODULE(_autoneuronet, m) {
     m.doc() = "AutoNeuroNet is a library for automatic differentiation and neural networks.";
 
     py::class_<Var>(m, "Var",

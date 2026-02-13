@@ -1,0 +1,40 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11", "cmake", "ninja"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "autoneuronet"
+version = "0.1.0"
+description = "AutoNeuroNet is a C++ implementation of automatic differentiation, with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Rishab Alagharu", email = "rishabsaia@gmail.com" }]
+keywords = ["derivative", "gradient", "matrix", "machine learning", "deep learning", "neural network"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+demo = ["numpy", "matplotlib", "scikit-learn", "torchvision"]
+dev = ["build", "twine", "cibuildwheel"]
+
+[tool.scikit-build]
+cmake.minimum-version = "3.20"
+sdist.include = [
+    "CMakeLists.txt",
+    "pybind_wrapper.cpp",
+    "python/**",
+    "include/**",
+    "src/**",
+    "README.md",
+    "LICENSE"
+]
+
+[project.urls]
+Homepage = "https://github.com/RishabSA/AutoNeuroNet"
+Repository = "https://github.com/RishabSA/AutoNeuroNet"
+Documentation = "https://github.com/RishabSA/AutoNeuroNet"

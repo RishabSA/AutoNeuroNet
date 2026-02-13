@@ -13,6 +13,36 @@ cmake --build build
 
 The C++ dependencies can then be accessed from the build/ folder and imported in any Python files.
 
+For building the python package, run the following commands:
+
+```
+python -m pip uninstall -y autoneuronet # (if a preexisting package already exists)
+
+python -m pip install -U pip build
+python -m build
+python -m pip install dist/*.whl
+```
+
+To build with twine to upload to PyPi, run the following commands:
+
+```
+python -m pip install -U build twine
+python -m build
+python -m twine check dist/*
+```
+
+Upload to TestPyPi first to test:
+
+```
+python -m twine upload -r testpypi dist/*
+```
+
+Upload to PyPi first to test:
+
+```
+python -m twine upload dist/*
+```
+
 Resources I used as reference:
 
 - [What's Automatic Differentiation? - HuggingFace](https://huggingface.co/blog/andmholm/what-is-automatic-differentiation)
