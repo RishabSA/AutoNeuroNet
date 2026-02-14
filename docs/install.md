@@ -64,8 +64,8 @@ All OSes via GitHub Actions:
 3. Wheels are published to PyPI via Trusted Publishing. If you prefer API tokens, replace the publish step with `twine upload`.
 
 ```bash
-git tag -a v0.1.3 -m "v0.1.3"
-git push origin v0.1.3
+git tag -a v0.1.4 -m "v0.1.4"
+git push origin v0.1.4
 ```
 
 To build with twine to upload to PyPi, run the following commands:
