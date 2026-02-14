@@ -7,7 +7,7 @@
 **Who this is for**
 
 - You want a small, inspectable autodiff engine with C++-backed performance
-- You want to learn how AD and small neural networks work under the hood
+- You want a controllable experience and wnat to learn how automatic differentiation and neural networks work under the hood
 - You want to try out a new deep learning package
 
 **Next steps**
