@@ -48,26 +48,6 @@ python -m build
 python -m pip install dist/*.whl
 ```
 
-**Build wheels for macOS, Windows, and Linux**
-
-Local (current OS only):
-
-```bash
-python -m pip install -U cibuildwheel
-python -m cibuildwheel --output-dir dist
-```
-
-All OSes via GitHub Actions:
-
-1. Push a tag like `v0.1.3` (or run the workflow manually).
-2. The workflow in `.github/workflows/wheels.yml` builds wheels for Linux, macOS, and Windows.
-3. Wheels are published to PyPI via Trusted Publishing. If you prefer API tokens, replace the publish step with `twine upload`.
-
-```bash
-git tag -a v0.1.4 -m "v0.1.4"
-git push origin v0.1.4
-```
-
 To build with twine to upload to PyPi, run the following commands:
 
 ```bash
@@ -80,6 +60,18 @@ Upload to TestPyPi or PyPi:
 python -m twine upload -r testpypi dist/* # Upload to TestPyPi
 python -m twine upload dist/* # Upload to PyPi
 ```
+
+**Build wheels for macOS, Windows, and Linux via Github Actions**
+
+1. Commit all changes, but don't push yet
+2. Push a tag for the version: v0.1.N
+
+```bash
+git tag -a v0.1.N -m "v0.1.N"
+git push origin main v0.1.N
+```
+
+The workflow in `.github/workflows/wheels.yml` builds wheels for Linux, macOS, and Windows. Wheels are then published to PyPI via an API token.
 
 **Verify the install**
 
