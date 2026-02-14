@@ -1,7 +1,5 @@
 #include "NeuralNetwork.hpp"
 
-#include <stdexcept>
-
 void initWeights(Matrix& W, int fan_in, int fan_out, const std::string& init) {
     double stddev = 0.0;
     if (init == "xavier" || init == "glorot") {

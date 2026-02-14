@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <stdexcept>
+
 #include "Var.hpp"
 
 class Matrix {

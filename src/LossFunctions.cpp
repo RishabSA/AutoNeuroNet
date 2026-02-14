@@ -1,7 +1,5 @@
 #include "LossFunctions.hpp"
 
-#include <stdexcept>
-
 Var MSELoss(Matrix& labels, Matrix& preds) {
     if (labels.rows != preds.rows || labels.cols != preds.cols) {
         throw std::runtime_error("Dimension mismatch when attempting to compute loss - labels: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ") preds: (" + std::to_string(preds.rows) + ", " + std::to_string(preds.cols) + ")");

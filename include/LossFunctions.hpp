@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <utility>
+#include <stdexcept>
+
 #include "Matrix.hpp"
 
 Var MSELoss(Matrix& labels, Matrix& preds);

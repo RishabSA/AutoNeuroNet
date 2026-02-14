@@ -6,6 +6,7 @@
 #include <cmath>
 #include <random>
 #include <fstream>
+#include <stdexcept>
 
 #include "Matrix.hpp"
 
