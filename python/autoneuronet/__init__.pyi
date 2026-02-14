@@ -1,7 +1,11 @@
 """AutoNeuroNet is a fully implemented automatic differentiation engine with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++ for enhanced speed and performance."""
 
+from __future__ import annotations
+
 from types import ModuleType
-from typing import overload
+from typing import Any, Sequence, overload
+
+__version__: str
 
 class Var:
     """
@@ -189,7 +193,7 @@ class Matrix:
         ...
 
     @overload
-    def __setitem__(self, index: int, value: list[Var | float]) -> None:
+    def __setitem__(self, index: int, value: Sequence[Var | float]) -> None:
         """Set a row in the Matrix."""
         ...
 
@@ -635,12 +639,12 @@ class _Operations(ModuleType):
 
 operations: _Operations
 
-def numpy_to_matrix(array: any, *, as_column: bool = False) -> Matrix:
-    """Convert a numpy array or list to an AutoNeuroNet 2D Matrix."""
+def numpy_to_matrix(array: Any, *, as_column: bool = False) -> Matrix:
+    """Convert a numpy array or sequence to an AutoNeuroNet 2D Matrix."""
     ...
 
-def from_numpy(array: any, *, as_column: bool = False) -> Matrix:
-    """Convert a numpy array or list to an AutoNeuroNet 2D Matrix."""
+def from_numpy(array: Any, *, as_column: bool = False) -> Matrix:
+    """Convert a numpy array or sequence to an AutoNeuroNet 2D Matrix."""
     ...
 
 __all__: list[str]

@@ -1,4 +1,11 @@
+from importlib import metadata as _metadata
+
 from . import _autoneuronet as _core
+
+try:
+    __version__ = _metadata.version("autoneuronet")
+except _metadata.PackageNotFoundError:
+    __version__ = "0+unknown"
 
 Var = _core.Var
 Matrix = _core.Matrix
@@ -49,6 +56,7 @@ def numpy_to_matrix(array: any, *, as_column: bool = False) -> Matrix:
 from_numpy = numpy_to_matrix
 
 __all__ = [
+    "__version__",
     "Var",
     "Matrix",
     "Layer",

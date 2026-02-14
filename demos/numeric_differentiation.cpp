@@ -1,6 +1,9 @@
 #include <iostream>
 #include <cmath>
 
+// g++ demos/numeric_differentiation.cpp -o demos/numeric_differentiation && ./demos/numeric_differentiation
+
+
 double quadratic(double x) {
     // x^2
     return pow(x, 2);

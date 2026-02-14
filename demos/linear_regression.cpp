@@ -4,7 +4,7 @@
 #include "Optimizers.hpp"
 #include "LossFunctions.hpp"
 
-// g++ linear_regression.cpp src/Var.cpp src/Matrix.cpp src/NeuralNetwork.cpp src/Optimizers.cpp src/LossFunctions.cpp -I include -o linear_regression && ./linear_regression
+// g++ demos/linear_regression.cpp src/Var.cpp src/Matrix.cpp src/NeuralNetwork.cpp src/Optimizers.cpp src/LossFunctions.cpp -I include -o demos/linear_regression && ./demos/linear_regression
 
 int main () {
     int inDim = 1;

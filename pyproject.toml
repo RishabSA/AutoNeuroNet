@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "autoneuronet"
-version = "0.1.1"
+version = "0.1.2"
 description = "AutoNeuroNet is a fully implemented automatic differentiation engine with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++ for enhanced speed and performance."
 readme = "README.md"
 requires-python = ">=3.9"
