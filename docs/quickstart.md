@@ -1,16 +1,6 @@
-![AutoNeuroNet logo](assets/autoneuronet_name.svg)
+# Quickstart
 
-**AutoNeuroNet** is a full C++ implementation of an automatic differentiation engine with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++ for enhanced speed and performance.
-
-Install **AutoNeuroNet** with PIP:
-
-```bash
-pip install autoneuronet
-```
-
-See the full documentation at [https://rishabsa.github.io/AutoNeuroNet/](https://rishabsa.github.io/AutoNeuroNet/)
-
-## Quickstart
+This page shows small, working examples using **AutoNeuroNet**.
 
 To get started with AutoNeuroNet, import the package. AutoNeuroNet allows you to make automatically differentiable variables and matrices easily through the `Var` and `Matrix` classes, which store values and gradients as doubles.
 
@@ -121,9 +111,3 @@ optimizer.resetGrad()
 
 print(f"Loss: {loss.getVal()}")
 ```
-
-Reference Resources used in the development of AutoNeuroNet:
-
-- [What's Automatic Differentiation? - HuggingFace](https://huggingface.co/blog/andmholm/what-is-automatic-differentiation)
-- [Differentiate Automatically](https://comp6248.ecs.soton.ac.uk/handouts/autograd-handouts.pdf)
-- [Andrej Karpathy's MicroGrad](https://github.com/karpathy/micrograd)

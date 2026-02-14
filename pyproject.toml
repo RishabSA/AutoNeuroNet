@@ -37,4 +37,4 @@ sdist.include = [
 [project.urls]
 Homepage = "https://github.com/RishabSA/AutoNeuroNet"
 Repository = "https://github.com/RishabSA/AutoNeuroNet"
-Documentation = "https://github.com/RishabSA/AutoNeuroNet"
+Documentation = "https://rishabsa.github.io/AutoNeuroNet/"
