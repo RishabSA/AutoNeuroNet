@@ -10,14 +10,14 @@ Matrix::Matrix(int r, int c) {
     cols = c;
 
     data.resize(r);
-    for (int i = 0; i < r; ++i) {
+    for (int i = 0; i < r; i++) {
         data[i].resize(c);
     }
 };
 
 void Matrix::resetGradAndParents() {
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
             data[i][j].resetGradAndParents();
         }
     }

@@ -1,6 +1,8 @@
-![AutoNeuroNet logo](assets/autoneuronet_name.svg)
+<!-- ![AutoNeuroNet logo](assets/autoneuronet_name.svg) -->
 
-**AutoNeuroNet** is a full C++ implementation of an automatic differentiation engine with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++ for enhanced speed and performance.
+![AutoNeuroNet logo](https://raw.githubusercontent.com/RishabSA/AutoNeuroNet/refs/heads/main/assets/autoneuronet_name.svg)
+
+**AutoNeuroNet** is a fully implemented automatic differentiation engine with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++ for enhanced speed and performance.
 
 Install **AutoNeuroNet** with PIP:
 
@@ -22,9 +24,7 @@ import autoneuronet as ann
 x = ann.Var(2.0)
 y = x**2 + x * 3.0 + 1.0
 
-# Backprop
-
-# Set the final gradient to 1.0 and backpropagate.
+# Set the final gradient to 1.0 and perform Backpropagation
 y.setGrad(1.0)
 y.backward()
 

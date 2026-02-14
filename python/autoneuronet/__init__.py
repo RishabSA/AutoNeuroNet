@@ -25,7 +25,7 @@ operations = _core.operations
 
 
 def numpy_to_matrix(array: any, *, as_column: bool = False) -> Matrix:
-    """Convert a numpy array or sequence to a Matrix."""
+    """Convert a numpy array or sequence to an AutoNeuroNet 2D Matrix."""
     import numpy as np
 
     numpy_array = np.asarray(array, dtype=float)

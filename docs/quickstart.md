@@ -12,9 +12,7 @@ import autoneuronet as ann
 x = ann.Var(2.0)
 y = x**2 + x * 3.0 + 1.0
 
-# Backprop
-
-# Set the final gradient to 1.0 and backpropagate.
+# Set the final gradient to 1.0 and perform Backpropagation
 y.setGrad(1.0)
 y.backward()
 

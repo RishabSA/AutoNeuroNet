@@ -4,8 +4,18 @@ theme:
   logo: assets/autoneuronet.svg
   favicon: assets/autoneuronet.svg
   palette:
-    primary: light blue
-    accent: yellow
+    - scheme: default
+      primary: blue
+      accent: orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: orange
+      toggle:
+        icon: material/white-balance-sunny
+        name: Switch to light mode
 nav:
   - Home: index.md
   - Install: install.md

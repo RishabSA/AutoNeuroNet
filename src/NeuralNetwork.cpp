@@ -290,7 +290,7 @@ void NeuralNetwork::loadWeights(const std::string& path) {
 
         if (bias_rows != linear->b.rows || bias_cols != linear->b.cols) throw std::runtime_error("Bias shape mismatch");
 
-        for (int i = 0; i < bias_rows; ++i) {
+        for (int i = 0; i < bias_rows; i++) {
             for (int j = 0; j < bias_cols; j++) {
                 double val;
                 inFile.read(reinterpret_cast<char*>(&val), sizeof(val));
