@@ -1,10 +1,12 @@
-<!-- ![AutoNeuroNet logo](assets/autoneuronet_name.svg) -->
-
 ![AutoNeuroNet logo](https://raw.githubusercontent.com/RishabSA/AutoNeuroNet/refs/heads/main/assets/autoneuronet_name.svg)
 
 **AutoNeuroNet** is a fully implemented automatic differentiation engine with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++ for enhanced speed and performance.
 
-Install **AutoNeuroNet** with PIP:
+See AutoNeuroNet in action with a simple 3D visualization of gradient descent through reverse-mode automatic differentiation and backpropagation of gradients:
+
+![AutoNeuroNet Gradient Decsent 3D Visualization](https://raw.githubusercontent.com/RishabSA/AutoNeuroNet/refs/heads/main/assets/gradient_descent_3d_vis.gif)
+
+Install **AutoNeuroNet** with [PIP](https://pypi.org/project/autoneuronet/):
 
 ```bash
 pip install autoneuronet

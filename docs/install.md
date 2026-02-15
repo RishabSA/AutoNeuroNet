@@ -64,7 +64,7 @@ python -m twine upload dist/* # Upload to PyPi
 **Build wheels for macOS, Windows, and Linux via Github Actions**
 
 1. Commit all changes, but don't push yet
-2. Push a tag for the version: v0.1.N
+2. Push a tag for the version: v0.1.N (Note: If you push without setting a tag, the wheels workflow will not run, and the package will not be pushed to PyPi)
 
 ```bash
 git tag -a v0.1.N -m "v0.1.N"
