@@ -1,4 +1,4 @@
-"""AutoNeuroNet is a fully implemented automatic differentiation engine with custom matrices and a full neural network architecture and training pipeline. It comes with Python bindings through PyBind11, allowing for quick and easy development of networks through Python, backed with C++ for enhanced speed and performance."""
+"""AutoNeuroNet is a fully implemented automatic differentiation engine with custom matrices, a full neural network architecture, and a training pipeline. It comes with Python bindings via PyBind11, enabling quick, easy network development in Python, backed by C++ for enhanced speed and performance."""
 
 from __future__ import annotations
 
