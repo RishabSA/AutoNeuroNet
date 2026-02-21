@@ -22,6 +22,10 @@ NeuralNetwork = _core.NeuralNetwork
 Optimizer = _core.Optimizer
 GradientDescentOptimizer = _core.GradientDescentOptimizer
 SGDOptimizer = _core.SGDOptimizer
+AdagradOptimizer = _core.AdagradOptimizer
+RMSPropOptimizer = _core.RMSPropOptimizer
+AdamOptimizer = _core.AdamOptimizer
+AdamWOptimizer = _core.AdamWOptimizer
 matmul = _core.matmul
 MSELoss = _core.MSELoss
 MAELoss = _core.MAELoss
@@ -31,7 +35,7 @@ CrossEntropyLossWithLogits = _core.CrossEntropyLossWithLogits
 operations = _core.operations
 
 
-def numpy_to_matrix(array: any, *, as_column: bool = False) -> Matrix:
+def numpy_to_matrix(array: any, *, as_column: bool = False) -> _core.Matrix:
     """Convert a numpy array or sequence to an AutoNeuroNet 2D Matrix."""
     import numpy as np
 
@@ -72,6 +76,10 @@ __all__ = [
     "Optimizer",
     "GradientDescentOptimizer",
     "SGDOptimizer",
+    "AdagradOptimizer",
+    "RMSPropOptimizer",
+    "AdamOptimizer",
+    "AdamWOptimizer",
     "matmul",
     "MSELoss",
     "MAELoss",

@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <utility>
+#include <string>
 #include <stdexcept>
 
 #include "Matrix.hpp"

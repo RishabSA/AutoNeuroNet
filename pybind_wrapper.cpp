@@ -12,7 +12,7 @@ namespace py = pybind11;
 static int normalize_index(int idx, int size) {
     if (idx < 0) idx += size;
     return idx;
-}
+};
 
 PYBIND11_MODULE(_autoneuronet, m) {
     m.doc() = "AutoNeuroNet is a fully implemented automatic differentiation engine with custom matrices, a full neural network architecture, and a training pipeline. It comes with Python bindings via PyBind11, enabling quick, easy network development in Python, backed by C++ for enhanced speed and performance.";
@@ -24,14 +24,14 @@ A scalar value used for reverse-mode automatic differentiation.
 Build expressions with Var objects, then call `backward()` on the final output after setting its gradient to 1.0 to accumulate gradients.
 Var supports basic arithmetic operations, exponential operations, trigonometric functions, and activation functions.
 )doc")
-        .def(py::init<double>(), py::arg("initial"), "Create a Var with an initial value.")
+        .def(py::init<double, bool>(), py::arg("initial"), py::arg("requires_grad") = true, "Create a Var with an initial value and optional gradient tracking.")
 
         .def("getVal", &Var::getVal)
-        .def("setVal", &Var::setVal, py::arg("v"))
+        .def("setVal", &Var::setVal, py::arg("val"))
         .def_property("val", &Var::getVal, &Var::setVal, "Current value of the variable.")
 
         .def("getGrad", &Var::getGrad)
-        .def("setGrad", &Var::setGrad, py::arg("v"))
+        .def("setGrad", &Var::setGrad, py::arg("grad"))
         .def_property("grad", &Var::getGrad, &Var::setGrad, "Current gradient of the variable")
 
         .def("add", py::overload_cast<Var&>(&Var::add), py::arg("other"), "Add another variable to the current variable.")
@@ -44,20 +44,20 @@ Var supports basic arithmetic operations, exponential operations, trigonometric 
         .def("subtract", py::overload_cast<double>(&Var::subtract), py::arg("other"), "Subtract a double from the current variable.")
         .def("__sub__", [](Var &a, Var &b) { return a.subtract(b); }, py::is_operator())
         .def("__sub__", [](Var &a, double s) { return a.subtract(s); }, py::is_operator())
-        .def("__rsub__", [](Var &a, double s) { return Var(s).subtract(a); }, py::is_operator())
+        .def("__rsub__", [](Var &a, double s) { return Var(s, false).subtract(a); }, py::is_operator())
 
         .def("multiply", py::overload_cast<Var&>(&Var::multiply), py::arg("other"), "Multiply another variable with the current variable.")
         .def("multiply", py::overload_cast<double>(&Var::multiply), py::arg("other"), "Multiply a double with the current variable.")
         .def("__mul__", [](Var &a, Var &b) { return a.multiply(b); }, py::is_operator())
         .def("__mul__", [](Var &a, double s) { return a.multiply(s); }, py::is_operator())
         .def("__rmul__", [](Var &a, double s) { return a.multiply(s); }, py::is_operator())
-        .def("__neg__", [](Var &a) { Var negative(-1.0); return a.multiply(negative); }, py::is_operator())
+        .def("__neg__", [](Var &a) { Var negative(-1.0, false); return a.multiply(negative); }, py::is_operator())
 
         .def("divide", py::overload_cast<Var&>(&Var::divide), py::arg("other"), "Divide another variable from the current variable.")
         .def("divide", py::overload_cast<double>(&Var::divide), py::arg("other"), "Divide a double from the current variable.")
         .def("__truediv__", [](Var &a, Var &b) { return a.divide(b); }, py::is_operator())
         .def("__truediv__", [](Var &a, double s) { return a.divide(s); }, py::is_operator())
-        .def("__rtruediv__", [](Var &a, double s) { return Var(s).divide(a); }, py::is_operator())
+        .def("__rtruediv__", [](Var &a, double s) { return Var(s, false).divide(a); }, py::is_operator())
 
         .def("pow", &Var::pow, py::arg("power"), "Take the power of the current variable to an integer.")
         .def("__pow__", [](Var &a, int power) { return a.pow(power); }, py::is_operator(), py::arg("power"))
@@ -83,6 +83,8 @@ Var supports basic arithmetic operations, exponential operations, trigonometric 
         .def("elu", &Var::elu, py::arg("alpha") = 1.0, "Apply the Exponential Linear Unit (ELU) activation function to the current variable.")
 
         .def("resetGradAndParents", &Var::resetGradAndParents, "Set the current gradient to 0.0 and clear any parent node references.")
+        .def("noGrad", &Var::noGrad, "Disable gradient tracking and detach this variable from its parents.")
+        .def("detach", &Var::detach, "Return a detached copy of this variable with no gradient history.")
         .def("backward", &Var::backward, "Perofrm backpropagation from the current variable, and accumulate gradients.")
 
         .def("__repr__", [](const Var& v) {
@@ -94,7 +96,7 @@ A 2D Matrix of Var objects.
 
 Matrices support all the same operations as Var objects and accumulate gradients on all variables in the matrix.
 )doc")
-        .def(py::init<int, int>(), py::arg("rows"), py::arg("cols"), "Create a 2D Matrix of size (rows x cols) filled with 0s.")
+        .def(py::init<int, int, bool>(), py::arg("rows"), py::arg("cols"), py::arg("requires_grad") = true, "Create a 2D Matrix of size (rows x cols) filled with 0s and optional gradient tracking.")
         
         .def_readonly("rows", &Matrix::rows, "Number of rows in the current 2D matrix.")
         .def_readonly("cols", &Matrix::cols, "Number of columns in the current 2D matrix.")
@@ -123,7 +125,8 @@ Matrices support all the same operations as Var objects and accumulate gradients
                     if (py::isinstance<Var>(item)) {
                         M(normalized_i, j) = item.cast<Var>();
                     } else {
-                        M(normalized_i, j) = Var(item.cast<double>());
+                        bool req = M(normalized_i, j).requiresGrad();
+                        M(normalized_i, j) = Var(item.cast<double>(), req);
                     }
                 }
             }, py::arg("index"), py::arg("value"), "Set a row in the Matrix.")
@@ -152,7 +155,8 @@ Matrices support all the same operations as Var objects and accumulate gradients
 
                 if (normalized_i < 0 || normalized_i >= M.rows || normalized_j < 0 || normalized_j >= M.cols) throw std::out_of_range("Matrix indices " + std::to_string(i) + " and " + std::to_string(j) + " out of range");
                     
-                M(normalized_i, normalized_j) = Var(v);
+                bool req = M(normalized_i, normalized_j).requiresGrad();
+                M(normalized_i, normalized_j) = Var(v, req);
             },
             py::arg("index"), py::arg("value"), "Set an item in the Matrix to a new double.")
         .def("__setitem__", [](Matrix &M, py::tuple idx, const Var &v) {
@@ -170,6 +174,8 @@ Matrices support all the same operations as Var objects and accumulate gradients
             py::arg("index"), py::arg("value"), "Set an item from the Matrix to a new variable.")
 
         .def("resetGradAndParents", &Matrix::resetGradAndParents,  "Set all gradients in the matrix to 0.0 and clear any parent node references.")
+        .def("noGrad", &Matrix::noGrad, "Disable gradient tracking and detach all variables in the matrix.")
+        .def("detach", &Matrix::detach, "Return a detached copy of this matrix with no gradient history.")
         .def("randomInit", &Matrix::randomInit, "Randomly initialize all variables in the matrix with small values.")
 
         .def("getValsMatrix", &Matrix::getValsMatrix, "Get all of the values in the matrix.")
@@ -235,9 +241,8 @@ Base class for all layers that can be added to a Neural Network.
     py::class_<Linear, Layer, std::shared_ptr<Linear>>(m, "Linear", R"doc(
 Fully-connected Linear layer that can be added to a Neural Network.
 )doc")
-        .def(py::init<int, int, std::string>(), py::arg("in_dim"), py::arg("out_dim"), py::arg("init") = "he", "Intitialize the weight matrix and bias vector of the current Linear layer with an initialization method for use in a Neural Network.")
+        .def(py::init<int, int, std::string>(), py::arg("in_dim"), py::arg("out_dim"), py::arg("init") = "kaiming", "Intitialize the weight matrix and bias vector of the current Linear layer with an initialization method for use in a Neural Network.")
         .def("forward", &Linear::forward, py::arg("input"), "Perform a single forward pass through the current Linear layer.")
-        .def("optimizeWeights", &Linear::optimizeWeights, py::arg("learning_rate"), "Once gardients have been accumulated from a loss function and backpropagation, optimize the weights by moving in the direction of the negative gradient.")
         .def("resetGrad", &Linear::resetGrad,  "Set all gradients in the weight matrix and bias vector to 0.0 and clear any parent node references.")
         .def_readonly("W", &Linear::W, "Weight matrix.")
         .def_readonly("b", &Linear::b, "Bias vector.");
@@ -309,6 +314,34 @@ Stochastic gradient descent (SGD) optimizer with momentum/weight decay.
         .def("optimize", &SGDOptimizer::optimize, "Optimize the weight matrices and bias vectors of every layer in a Neural Network using the Stochastic Gradient Descent (SGD) algorithm once gradients have been accumulated through backpropagation.")
         .def("resetGrad", &SGDOptimizer::resetGrad, "Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references.");
 
+    py::class_<AdagradOptimizer, Optimizer>(m, "AdagradOptimizer", R"doc(
+Adagrad optimizer for a Neural Network.
+)doc")
+        .def(py::init<double, NeuralNetwork*, double>(), py::arg("learning_rate"), py::arg("model"), py::arg("epsilon") = 1e-8, py::keep_alive<1, 2>(), "Initialize the Adagrad optimizer with a learning rate, the Neural Network model to optimize, and epsilon.")
+        .def("optimize", &AdagradOptimizer::optimize, "Optimize the weight matrices and bias vectors of every layer in a Neural Network using the Adagrad algorithm once gradients have been accumulated through backpropagation.")
+        .def("resetGrad", &AdagradOptimizer::resetGrad, "Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references.");
+
+    py::class_<RMSPropOptimizer, Optimizer>(m, "RMSPropOptimizer", R"doc(
+RMSProp optimizer for a Neural Network.
+)doc")
+        .def(py::init<double, NeuralNetwork*, double, double>(), py::arg("learning_rate"), py::arg("model"), py::arg("decay_rate") = 0.9, py::arg("epsilon") = 1e-8, py::keep_alive<1, 2>(), "Initialize the RMSProp optimizer with a learning rate, the Neural Network model to optimize, decay rate, and epsilon.")
+        .def("optimize", &RMSPropOptimizer::optimize, "Optimize the weight matrices and bias vectors of every layer in a Neural Network using the RMSProp algorithm once gradients have been accumulated through backpropagation.")
+        .def("resetGrad", &RMSPropOptimizer::resetGrad, "Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references.");
+
+    py::class_<AdamOptimizer, Optimizer>(m, "AdamOptimizer", R"doc(
+Adam optimizer for a Neural Network.
+)doc")
+        .def(py::init<double, NeuralNetwork*, double, double, double>(), py::arg("learning_rate"), py::arg("model"), py::arg("beta1") = 0.9, py::arg("beta2") = 0.999, py::arg("epsilon") = 1e-8, py::keep_alive<1, 2>(), "Initialize the Adam optimizer with a learning rate, the Neural Network model to optimize, beta1, beta2, and epsilon.")
+        .def("optimize", &AdamOptimizer::optimize, "Optimize the weight matrices and bias vectors of every layer in a Neural Network using the Adam algorithm once gradients have been accumulated through backpropagation.")
+        .def("resetGrad", &AdamOptimizer::resetGrad, "Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references.");
+
+    py::class_<AdamWOptimizer, Optimizer>(m, "AdamWOptimizer", R"doc(
+AdamW optimizer for a Neural Network.
+)doc")
+        .def(py::init<double, NeuralNetwork*, double, double, double, double>(), py::arg("learning_rate"), py::arg("model"), py::arg("beta1") = 0.9, py::arg("beta2") = 0.999, py::arg("epsilon") = 1e-8, py::arg("weight_decay") = 0.0, py::keep_alive<1, 2>(), "Initialize the AdamW optimizer with a learning rate, the Neural Network model to optimize, beta1, beta2, epsilon, and weight decay.")
+        .def("optimize", &AdamWOptimizer::optimize, "Optimize the weight matrices and bias vectors of every layer in a Neural Network using the AdamW algorithm once gradients have been accumulated through backpropagation.")
+        .def("resetGrad", &AdamWOptimizer::resetGrad, "Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references.");
+
     m.def("matmul", &matmul, py::arg("A"), py::arg("B"), "Matrix multiply a matrix with another matrix.");
     m.def("MSELoss", &MSELoss, py::arg("labels"), py::arg("preds"), "Compute the Mean Squared Error (MSE) Loss given a matrix of labels and a matrix of predictions.");
     m.def("MAELoss", &MAELoss, py::arg("labels"), py::arg("preds"), "Compute the Mean Absolute Error (MAE) Loss given a matrix of labels and a matrix of predictions.");
@@ -343,4 +376,4 @@ Stochastic gradient descent (SGD) optimizer with momentum/weight decay.
     
     operations.def("abs", [](Var& v) { return v.abs(); }, py::arg("var"), "Take the absolute value |x| of a variable.");
     operations.def("abs", [](Matrix& matrix) { return matrix.abs(); }, py::arg("matrix"), "Take the absolute value |x| of each variable in a matrix.");
-}
+};

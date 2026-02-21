@@ -15,28 +15,28 @@ class Var:
     Var supports basic arithmetic operations, exponential operations, trigonometric functions, and activation functions.
     """
 
-    def __init__(self, initial: float) -> None:
+    def __init__(self, initial: float, requires_grad: bool = True) -> None:
         """Create a Var with an initial value."""
         ...
 
     def getVal(self) -> float: ...
-    def setVal(self, v: float) -> None: ...
+    def setVal(self, val: float) -> None: ...
     @property
     def val(self) -> float:
         """Current value of the variable."""
         ...
 
     @val.setter
-    def val(self, v: float) -> None: ...
+    def val(self, val: float) -> None: ...
     def getGrad(self) -> float: ...
-    def setGrad(self, v: float) -> None: ...
+    def setGrad(self, grad: float) -> None: ...
     @property
     def grad(self) -> float:
         """Current gradient of the variable"""
         ...
 
     @grad.setter
-    def grad(self, v: float) -> None: ...
+    def grad(self, grad: float) -> None: ...
     @overload
     def add(self, other: Var) -> Var:
         """Add another variable to the current variable."""
@@ -155,6 +155,14 @@ class Var:
         """Set the current gradient to 0.0 and clear any parent node references."""
         ...
 
+    def noGrad(self) -> None:
+        """Disable gradient tracking and detach this variable from its parents."""
+        ...
+
+    def detach(self) -> Var:
+        """Return a detached copy of this variable with no gradient history."""
+        ...
+
     def backward(self) -> None:
         """Perofrm backpropagation from the current variable, and accumulate gradients."""
         ...
@@ -168,7 +176,7 @@ class Matrix:
     Matrices support all the same operations as Var objects and accumulate gradients on all variables in the matrix.
     """
 
-    def __init__(self, rows: int, cols: int) -> None:
+    def __init__(self, rows: int, cols: int, requires_grad: bool = True) -> None:
         """Create a 2D Matrix of size (rows x cols) filled with 0s."""
         ...
 
@@ -209,6 +217,14 @@ class Matrix:
 
     def resetGradAndParents(self) -> None:
         """Set all gradients in the matrix to 0.0 and clear any parent node references."""
+        ...
+
+    def noGrad(self) -> None:
+        """Disable gradient tracking and detach all variables in the matrix."""
+        ...
+
+    def detach(self) -> Matrix:
+        """Return a detached copy of this matrix with no gradient history."""
         ...
 
     def randomInit(self) -> None:
@@ -349,16 +365,12 @@ class Layer:
 class Linear(Layer):
     """Fully-connected Linear layer that can be added to a Neural Network."""
 
-    def __init__(self, in_dim: int, out_dim: int, init: str = "he") -> None:
+    def __init__(self, in_dim: int, out_dim: int, init: str = "kaiming") -> None:
         """Intitialize the weight matrix and bias vector of the current Linear layer with an initialization method for use in a Neural Network."""
         ...
 
     def forward(self, input: Matrix) -> Matrix:
         """Perform a single forward pass through the current Linear layer."""
-        ...
-
-    def optimizeWeights(self, learning_rate: float) -> None:
-        """Once gardients have been accumulated from a loss function and backpropagation, optimize the weights by moving in the direction of the negative gradient."""
         ...
 
     def resetGrad(self) -> None:
@@ -500,7 +512,7 @@ class GradientDescentOptimizer(Optimizer):
         ...
 
 class SGDOptimizer(Optimizer):
-    """Stochastic gradient descent (SGD) optimizer with momentum/weight decay."""
+    """Stochastic gradient descent (SGD) optimizer for a Neural Network to update weight matrices and bias vectors with momentum/weight decay."""
 
     def __init__(
         self,
@@ -514,6 +526,89 @@ class SGDOptimizer(Optimizer):
 
     def optimize(self) -> None:
         """Optimize the weight matrices and bias vectors of every layer in a Neural Network using the Stochastic Gradient Descent (SGD) algorithm once gradients have been accumulated through backpropagation."""
+        ...
+
+    def resetGrad(self) -> None:
+        """Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references."""
+        ...
+
+class AdagradOptimizer(Optimizer):
+    """Adagrad optimizer for a Neural Network to update weight matrices and bias vectors."""
+
+    def __init__(
+        self, learning_rate: float, model: NeuralNetwork, epsilon: float = 1e-8
+    ) -> None:
+        """Initialize the Adagrad optimizer with a learning rate, the Neural Network model to optimize, and epsilon."""
+        ...
+
+    def optimize(self) -> None:
+        """Optimize the weight matrices and bias vectors of every layer in a Neural Network using the Adagrad algorithm once gradients have been accumulated through backpropagation."""
+        ...
+
+    def resetGrad(self) -> None:
+        """Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references."""
+        ...
+
+class RMSPropOptimizer(Optimizer):
+    """RMSProp optimizer for a Neural Network to update weight matrices and bias vectors."""
+
+    def __init__(
+        self,
+        learning_rate: float,
+        model: NeuralNetwork,
+        decay_rate: float = 0.9,
+        epsilon: float = 1e-8,
+    ) -> None:
+        """Initialize the RMSProp optimizer with a learning rate, the Neural Network model to optimize, decay rate, and epsilon."""
+        ...
+
+    def optimize(self) -> None:
+        """Optimize the weight matrices and bias vectors of every layer in a Neural Network using the RMSProp algorithm once gradients have been accumulated through backpropagation."""
+        ...
+
+    def resetGrad(self) -> None:
+        """Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references."""
+        ...
+
+class AdamOptimizer(Optimizer):
+    """Adam optimizer for a Neural Network to update weight matrices and bias vectors."""
+
+    def __init__(
+        self,
+        learning_rate: float,
+        model: NeuralNetwork,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
+        epsilon: float = 1e-8,
+    ) -> None:
+        """Initialize the Adam optimizer with a learning rate, the Neural Network model to optimize, beta1, beta2, and epsilon."""
+        ...
+
+    def optimize(self) -> None:
+        """Optimize the weight matrices and bias vectors of every layer in a Neural Network using the Adam algorithm once gradients have been accumulated through backpropagation."""
+        ...
+
+    def resetGrad(self) -> None:
+        """Set all gradients for every layer's weight matrix and bias vector to 0.0 and clear any parent node references."""
+        ...
+
+class AdamWOptimizer(Optimizer):
+    """AdamW optimizer for a Neural Network to update weight matrices and bias vectors."""
+
+    def __init__(
+        self,
+        learning_rate: float,
+        model: NeuralNetwork,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
+        epsilon: float = 1e-8,
+        weight_decay: float = 0.0,
+    ) -> None:
+        """Initialize the AdamW optimizer with a learning rate, the Neural Network model to optimize, beta1, beta2, epsilon, and weight decay."""
+        ...
+
+    def optimize(self) -> None:
+        """Optimize the weight matrices and bias vectors of every layer in a Neural Network using the AdamW algorithm once gradients have been accumulated through backpropagation."""
         ...
 
     def resetGrad(self) -> None:

@@ -82,11 +82,11 @@ import numpy as np
 
 model = ann.NeuralNetwork(
     [
-        ann.Linear(784, 256, init="he"),
+        ann.Linear(784, 256, init="kaiming"),
         ann.ReLU(),
-        ann.Linear(256, 128, init="he"),
+        ann.Linear(256, 128, init="kaiming"),
         ann.ReLU(),
-        ann.Linear(128, 10, init="he"),
+        ann.Linear(128, 10, init="kaiming"),
         ann.Softmax(),
     ]
 )

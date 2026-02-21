@@ -56,7 +56,7 @@ int main () {
     std::cout << "Final Model Predictions:\n" << std::endl;
     std::cout << Y_pred_final.getValsMatrix() << std::endl;
 
-    auto linear_layer = std::dynamic_pointer_cast<Linear>(model.layers[0]);
+    std::shared_ptr<Linear> linear_layer = std::dynamic_pointer_cast<Linear>(model.layers[0]);
     Matrix& W_learned = linear_layer->W;
     Matrix& b_learned = linear_layer->b;
 

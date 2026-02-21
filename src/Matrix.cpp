@@ -3,16 +3,16 @@
 Matrix::Matrix() {
     rows = 0;
     cols = 0;
+    requires_grad = true;
 };
 
-Matrix::Matrix(int r, int c) {
+Matrix::Matrix(int r, int c, bool requires_grad) {
     rows = r;
     cols = c;
+    requires_grad = requires_grad;
 
-    data.resize(r);
-    for (int i = 0; i < r; i++) {
-        data[i].resize(c);
-    }
+    // Initialize (rows, cols) size matrix filled with 0.0
+    data.assign(r, std::vector<Var>(c, Var(0.0, requires_grad)));
 };
 
 void Matrix::resetGradAndParents() {
@@ -21,6 +21,26 @@ void Matrix::resetGradAndParents() {
             data[i][j].resetGradAndParents();
         }
     }
+}
+
+void Matrix::noGrad() {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            data[i][j].noGrad();
+        }
+    }
+}
+
+Matrix Matrix::detach() const {
+    Matrix Y(rows, cols, false);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            Y.data[i][j] = data[i][j].detach();
+        }
+    }
+
+    return Y;
 }
 
 std::string Matrix::getValsMatrix() const {
@@ -58,7 +78,7 @@ void Matrix::randomInit() {
             std::mt19937 gen(rd());
             std::uniform_real_distribution<double> unif(-0.01, 0.01);
 
-            data[i][j] = unif(gen);
+            data[i][j].setVal(unif(gen));
         }
     }
 };
@@ -75,10 +95,9 @@ Matrix Matrix::add(Matrix& other) {
         }
     } else if (other.rows == 1 && other.cols == 1) {
         // Broadcast the scalar for matrix addition when the other has shape (1, 1)
-        Var& val = other.data[0][0];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                Y.data[i][j] = data[i][j] + val;
+                Y.data[i][j] = data[i][j] + other.data[0][0];
             }
         }
     } else if (other.rows == 1 && other.cols == cols) {
@@ -91,9 +110,8 @@ Matrix Matrix::add(Matrix& other) {
     } else if (other.cols == 1 && other.rows == rows) {
         // Broadcast a column vector across columns
         for (int i = 0; i < rows; i++) {
-            Var& val = other.data[i][0];
             for (int j = 0; j < cols; j++) {
-                Y.data[i][j] = data[i][j] + val;
+                Y.data[i][j] = data[i][j] + other.data[i][0];
             }
         }
     } else {
@@ -106,6 +124,7 @@ Matrix Matrix::add(Matrix& other) {
 Matrix Matrix::add(double other) {
     Matrix Y(rows, cols);
 
+    // Broadcast the scalar for matrix addition across the entire matrix
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = data[i][j] + other;
@@ -127,10 +146,9 @@ Matrix Matrix::subtract(Matrix& other) {
         }
     } else if (other.rows == 1 && other.cols == 1) {
         // Broadcast the scalar for matrix addition when the other has shape (1, 1)
-        Var& val = other.data[0][0];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                Y.data[i][j] = data[i][j] - val;
+                Y.data[i][j] = data[i][j] - other.data[0][0];
             }
         }
     } else if (other.rows == 1 && other.cols == cols) {
@@ -143,9 +161,8 @@ Matrix Matrix::subtract(Matrix& other) {
     } else if (other.cols == 1 && other.rows == rows) {
         // Broadcast a column vector across columns
         for (int i = 0; i < rows; i++) {
-            Var& val = other.data[i][0];
             for (int j = 0; j < cols; j++) {
-                Y.data[i][j] = data[i][j] - val;
+                Y.data[i][j] = data[i][j] - other.data[i][0];
             }
         }
     } else {
@@ -158,6 +175,7 @@ Matrix Matrix::subtract(Matrix& other) {
 Matrix Matrix::subtract(double other) {
     Matrix Y(rows, cols);
 
+    // Broadcast the scalar for matrix subtraction across the entire matrix
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = data[i][j] - other;
@@ -170,6 +188,7 @@ Matrix Matrix::subtract(double other) {
 Matrix Matrix::multiply(double other) {
     Matrix Y(rows, cols);
 
+    // Broadcast the scalar for multiplication across the entire matrix
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = data[i][j] * other;
@@ -180,16 +199,22 @@ Matrix Matrix::multiply(double other) {
 };
 
 Matrix Matrix::matmul(Matrix& other) {
+    // (this.rows, this.cols) @ (other.rows, other.cols) = (this.rows, other.cols)
+    if (cols != other.rows) {
+        throw std::runtime_error("Dimension mismatch when attempting to matmul matrices - (" + std::to_string(rows) + ", " + std::to_string(cols) + ") @ (" + std::to_string(other.rows) + ", " + std::to_string(other.cols) + ")");
+    }
+
     Matrix Y(rows, other.cols);
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < other.cols; j++) {
-            Var sum(0.0);
+            Var sum(0.0, false);
 
             for (int t = 0; t < cols; t++) {
                 Var current(data[i][t] * other.data[t][j]);
-                sum = sum + current;
+                sum = sum + current; // sets requires_grad = true
             }
+
             Y.data[i][j] = sum;
         }
     }
@@ -197,17 +222,22 @@ Matrix Matrix::matmul(Matrix& other) {
     return Y;
 };
 
-Matrix matmul(Matrix& X0, Matrix& X1) {
-    Matrix Y(X0.rows, X1.cols);
+Matrix matmul(Matrix& A, Matrix& B) {
+    if (A.cols != B.rows) {
+        throw std::runtime_error("Dimension mismatch when attempting to matmul matrices - (" + std::to_string(A.rows) + ", " + std::to_string(A.cols) + ") @ (" + std::to_string(B.rows) + ", " + std::to_string(B.cols) + ")");
+    }
 
-    for (int i = 0; i < X0.rows; i++) {
-        for (int j = 0; j < X1.cols; j++) {
-            Var sum(0.0);
+    Matrix Y(A.rows, B.cols);
 
-            for (int t = 0; t < X0.cols; t++) {
-                Var current(X0.data[i][t] * X1.data[t][j]);
-                sum = sum + current;
+    for (int i = 0; i < A.rows; i++) {
+        for (int j = 0; j < B.cols; j++) {
+            Var sum(0.0, false);
+
+            for (int t = 0; t < A.cols; t++) {
+                Var current(A.data[i][t] * B.data[t][j]);
+                sum = sum + current; // sets requires_grad = true
             }
+
             Y.data[i][j] = sum;
         }
     }
@@ -218,6 +248,7 @@ Matrix matmul(Matrix& X0, Matrix& X1) {
 Matrix Matrix::divide(double other) {
     Matrix Y(rows, cols);
 
+    // Broadcast the scalar for division across the entire matrix
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = data[i][j] / other;
@@ -230,6 +261,7 @@ Matrix Matrix::divide(double other) {
 Matrix Matrix::pow(int power) {
     Matrix Y(rows, cols);
 
+    // Broadcast the scalar for a power across the entire matrix
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = data[i][j].pow(power);
@@ -421,6 +453,7 @@ Matrix Matrix::elu(double alpha) {
 };
 
 Matrix Matrix::softmax() {
+    // softmax(data) = \frac{e^{data_i}}{\sum_j e^{data_j}}
     Matrix Y(rows, cols);
 
     for (int i = 0; i < rows; i++) {
@@ -429,16 +462,17 @@ Matrix Matrix::softmax() {
             row_max = std::max(row_max, data[i][j].getVal());
         }
 
-        Var sum(0.0);
+        Var sum(0.0, false);
         for (int j = 0; j < cols; j++) {
-            Var e = (data[i][j] - row_max).exp();
-            Y.data[i][j] = e;
-            sum = sum + e;
+            Var exp_raw_score = (data[i][j] - row_max).exp();
+            Y.data[i][j] = exp_raw_score;
+            sum = sum + exp_raw_score;  // sets requires_grad = true
         }
 
+        // Mean over distribution
         for (int j = 0; j < cols; j++) {
             Y.data[i][j] = Y.data[i][j] / sum;
         }
     }
     return Y;
-}
+};

@@ -17,6 +17,10 @@ This page shows the public Python API for **AutoNeuroNet**.
 
 - `GradientDescentOptimizer`
 - `SGDOptimizer`
+- `AdagradOptimizer`
+- `RMSPropOptimizer`
+- `AdamOptimizer`
+- `AdamWOptimizer`
 
 **Losses**
 
@@ -36,16 +40,20 @@ This page shows the public Python API for **AutoNeuroNet**.
 
 **Var**
 
-- Create a value: `Var(1.0)`
+- Create a value: `Var(1.0, requires_grad=True)`
 - Read/write value: `v.val`
 - Read/write gradient: `v.grad`
+- Disable grad: `v.noGrad()`
+- Detach: `v.detach()`
 - Backpropagation: `v.setGrad(1.0); v.backward()`
 
 **Matrix**
 
-- Create: `Matrix(rows, cols)`
+- Create: `Matrix(rows, cols, requires_grad=True)`
 - Index: `M[i, j]` or row slices `M[i]`
 - Math: `+`, `-`, `*`, `/`, `@`, `pow`, `sin`, `cos`, `tanh`, `relu`, `softmax`, etc.
+- Disable grad: `M.noGrad()`
+- Detach: `M.detach()`
 
 ## Neural Networks
 

@@ -13,27 +13,24 @@
 class Layer {
 public:
     std::string name;
-    bool trainable = false;
+    bool trainable;
 
     virtual ~Layer() = default;
 
     virtual Matrix forward(Matrix& input) = 0;
 
-    virtual void optimizeWeights(double learning_rate) = 0;
     virtual void resetGrad() = 0;
 };
 
 class Linear : public Layer {
 public:
-    Matrix W;
-    Matrix b;
+    Matrix W, b;
 
-    // init: "he" (default) or "xavier"
-    Linear(int inDim, int outDim, const std::string& init = "he");
+    // Weight initialization can be done with "kaiming"/"he" or "xavier"/"glorot"
+    Linear(int inDim, int outDim, const std::string& init = "kaiming");
 
     Matrix forward(Matrix& input) override;
 
-    void optimizeWeights(double learning_rate) override;
     void resetGrad() override;
 };
 
@@ -42,7 +39,8 @@ public:
     ReLU();
     
     Matrix forward(Matrix& input) override;
-    void optimizeWeights(double learning_rate) override;
+
+    // Do not do anything
     void resetGrad() override;
 };
 
@@ -53,7 +51,8 @@ public:
     LeakyReLU(double a);
     
     Matrix forward(Matrix& input) override;
-    void optimizeWeights(double learning_rate) override;
+
+    // Do not do anything
     void resetGrad() override;
 };
 
@@ -62,7 +61,8 @@ public:
     Sigmoid();
     
     Matrix forward(Matrix& input) override;
-    void optimizeWeights(double learning_rate) override;
+
+    // Do not do anything
     void resetGrad() override;
 };
 
@@ -71,7 +71,8 @@ public:
     Tanh();
     
     Matrix forward(Matrix& input) override;
-    void optimizeWeights(double learning_rate) override;
+
+    // Do not do anything
     void resetGrad() override;
 };
 
@@ -80,7 +81,8 @@ public:
     SiLU();
     
     Matrix forward(Matrix& input) override;
-    void optimizeWeights(double learning_rate) override;
+
+    // Do not do anything
     void resetGrad() override;
 };
 
@@ -91,7 +93,8 @@ public:
     ELU(double a);
     
     Matrix forward(Matrix& input) override;
-    void optimizeWeights(double learning_rate) override;
+
+    // Do not do anything
     void resetGrad() override;
 };
 
@@ -100,7 +103,8 @@ public:
     Softmax();
     
     Matrix forward(Matrix& input) override;
-    void optimizeWeights(double learning_rate) override;
+
+    // Do not do anything
     void resetGrad() override;
 };
 
@@ -122,3 +126,5 @@ public:
     void saveWeights(const std::string& path);
     void loadWeights(const std::string& path);
 };
+
+void initWeights(Matrix& W, int inDim, int outDim, const std::string& init);

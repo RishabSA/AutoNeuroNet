@@ -3,24 +3,34 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <algorithm>
+#include <string>
 #include <stdexcept>
 
 #include "Var.hpp"
 
+/*
+Matrix is a 2D container of differentiable Var objects.
+
+All scalar operations on Var can also be done on Matrix by applying them element-wise to each variable in a matrix.
+*/
 class Matrix {
 public:
     int rows, cols;
+    bool requires_grad;
     std::vector<std::vector<Var>> data;
 
     Matrix();
 
-    Matrix(int r, int c);
+    Matrix(int r, int c, bool requires_grad = true);
 
     Var& operator()(int row, int col) {
         return data[row][col];
     };
 
     void resetGradAndParents();
+    void noGrad();
+    Matrix detach() const;
 
     std::string getValsMatrix() const;
     std::string getGradsMatrix() const;
@@ -49,6 +59,7 @@ public:
 
     Matrix pow(int power);
 
+    // Trigonometric functions
     Matrix sin();
     Matrix cos();
     Matrix tan();
@@ -62,6 +73,7 @@ public:
 
     Matrix abs();
 
+    // Activation functions
     Matrix relu();
     Matrix leakyRelu(double alpha = 0.01);
     Matrix sigmoid();
@@ -71,4 +83,4 @@ public:
     Matrix softmax();
 };
 
-Matrix matmul(Matrix& X0, Matrix& X1);
+Matrix matmul(Matrix& A, Matrix& B);

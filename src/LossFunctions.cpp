@@ -5,7 +5,8 @@ Var MSELoss(Matrix& labels, Matrix& preds) {
         throw std::runtime_error("Dimension mismatch when attempting to compute loss - labels: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ") preds: (" + std::to_string(preds.rows) + ", " + std::to_string(preds.cols) + ")");
     }
 
-    Var loss(0.0);
+    // MSE(\hat{y}, y) = \frac{1}{m}\sum_{i = 1}^m(\hat{y}_i - y_i)^2
+    Var loss(0.0, false);
 
     for (int i = 0; i < labels.rows; i++) {
         for (int j = 0; j < labels.cols; j++) {
@@ -15,9 +16,7 @@ Var MSELoss(Matrix& labels, Matrix& preds) {
         }
     }
 
-    Var total(labels.rows * labels.cols);
-    loss = loss / total;
-
+    loss = loss / (labels.rows * labels.cols);
     return loss;
 };
 
@@ -26,7 +25,8 @@ Var MAELoss(Matrix& labels, Matrix& preds) {
         throw std::runtime_error("Dimension mismatch when attempting to compute loss - labels: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ") preds: (" + std::to_string(preds.rows) + ", " + std::to_string(preds.cols) + ")");
     }
 
-    Var loss(0.0);
+    // MAE(\hat{y}, y) = \frac{1}{m}\sum_{i = 1}^m | \hat{y}_i - y_i |
+    Var loss(0.0, false);
 
     for (int i = 0; i < labels.rows; i++) {
         for (int j = 0; j < labels.cols; j++) {
@@ -36,9 +36,7 @@ Var MAELoss(Matrix& labels, Matrix& preds) {
         }
     }
 
-    Var total(labels.rows * labels.cols);
-    loss = loss / total;
-
+    loss = loss / (labels.rows * labels.cols);
     return loss;
 };
 
@@ -47,33 +45,27 @@ Var BCELoss(Matrix& labels, Matrix& preds, double eps) {
         throw std::runtime_error("Dimension mismatch when attempting to compute loss - labels: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ") preds: (" + std::to_string(labels.rows) + ", " + std::to_string(labels.cols) + ")");
     }
 
-    Var loss(0.0);
+    // BCE(\hat{y}, y) = - \frac{1}{m}\sum_{i = 1}^m[y_i \ln (\hat{y}_i) + (1-y_i) \ln(1 - \hat{y}_i)]
+    Var loss(0.0, false);
 
     for (int i = 0; i < labels.rows; i++) {
         for (int j = 0; j < labels.cols; j++) {
             Var& y = labels.data[i][j];
             Var& p = preds.data[i][j];
 
-            Var p_eps = p + eps;
-            Var one(1.0);
-            Var one_minus_p = one - p;
-            Var one_minus_p_eps = one_minus_p + eps;
+            Var log_p = (p + eps).log();
+            Var log_one_minus_p = ((Var(1.0, false) - p) + eps).log();
+            Var one_minus_y = Var(1.0, false) - y;
 
-            Var logp = p_eps.log();
-            Var log_one_minus_p = one_minus_p_eps.log();
-
-            Var term1 = y.multiply(logp);
-            Var one_minus_y = one - y;
-            Var term2 = one_minus_y.multiply(log_one_minus_p);
-
+            Var term1 = y * log_p;
+            Var term2 = one_minus_y * log_one_minus_p;
             Var sum = term1 + term2;
+
             loss = loss - sum;
         }
     }
 
-    Var total(labels.rows * labels.cols);
-    loss = loss / total;
-
+    loss = loss / (labels.rows * labels.cols);
     return loss;
 };
 
@@ -86,54 +78,61 @@ Var CrossEntropyLoss(Matrix& labels, Matrix& preds, double eps) {
         throw std::runtime_error("CrossEntropyLoss expects labels shape (N, 1) with class indices");
     }
 
-    Var loss(0.0);
+    // CE(\hat{y}, y) = - \frac{1}{m}\sum_{i = 1}^m \sum_{k = 1}^K [y_{i, k} \ln(\hat{y}_{i, k})]
+    Var loss(0.0, false);
 
     for (int i = 0; i < labels.rows; i++) {
-        int cls = static_cast<int>(labels.data[i][0].getVal());
-        if (cls < 0 || cls >= preds.cols) {
+        int class_idx = static_cast<int>(labels.data[i][0].getVal());
+        if (class_idx < 0 || class_idx >= preds.cols) {
             throw std::runtime_error("CrossEntropyLoss class index out of range at row " + std::to_string(i));
         }
 
-        Var p = preds.data[i][cls];
-        Var p_eps = p + eps;
-        Var logp = p_eps.log();
-        loss = loss - logp;
+        Var p = preds.data[i][class_idx];
+        Var log_p = (p + eps).log();
+
+        loss = loss - log_p;
     }
 
-    Var rows(labels.rows);
-    loss = loss / rows;
-
+    loss = loss / labels.rows;
     return loss;
-}
+};
 
 Var CrossEntropyLossWithLogits(Matrix& labels, Matrix& logits, double eps) {
-    if (labels.rows != logits.rows) { /* ... */ }
-    if (labels.cols != 1) { /* ... */ }
+    if (labels.rows != logits.rows) {
+        throw std::runtime_error("Dimension mismatch in CrossEntropyLoss - labels rows: (" + std::to_string(labels.rows) + ") logits rows: (" + std::to_string(logits.rows) + ")");
+    }
 
-    Var loss(0.0);
+    if (labels.cols != 1) {
+        throw std::runtime_error("CrossEntropyLoss expects labels shape (N, 1) with class indices");
+    }
+
+    // CE(\hat{y}, y) = - \frac{1}{m}\sum_{i = 1}^m \sum_{k = 1}^K [y_{i, k} \ln(\hat{y}_{i, k})]
+    Var loss(0.0, false);
 
     for (int i = 0; i < labels.rows; i++) {
-        int cls = static_cast<int>(labels.data[i][0].getVal());
-        if (cls < 0 || cls >= logits.cols) { /* ... */ }
+        int class_idx = static_cast<int>(labels.data[i][0].getVal());
+        if (class_idx < 0 || class_idx >= logits.cols) {
+            throw std::runtime_error("CrossEntropyLoss class index out of range at row " + std::to_string(i));
+        }
 
         double row_max = logits.data[i][0].getVal();
         for (int j = 1; j < logits.cols; j++) {
             row_max = std::max(row_max, logits.data[i][j].getVal());
         }
 
-        Var sum(0.0);
+        // Softmax
+        Var sum(0.0, false);
         for (int j = 0; j < logits.cols; j++) {
-            Var e((logits.data[i][j] - row_max).exp());
-            sum = sum + e;
+            Var exp_raw_score((logits.data[i][j] - row_max).exp());
+            sum = sum + exp_raw_score;
         }
 
-        Var logsumexp = sum.log() + row_max;
-        Var logp = logits.data[i][cls] - logsumexp;
-        loss = loss - logp;
+        Var log_sum_exp = sum.log() + row_max;
+        Var log_p = logits.data[i][class_idx] - log_sum_exp;
+
+        loss = loss - log_p;
     }
 
-    Var rows(labels.rows);
-    loss = loss / rows;
-
+    loss = loss / labels.rows;
     return loss;
-}
+};

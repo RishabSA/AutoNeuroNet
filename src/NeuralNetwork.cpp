@@ -1,24 +1,26 @@
 #include "NeuralNetwork.hpp"
 
-void initWeights(Matrix& W, int fan_in, int fan_out, const std::string& init) {
-    double stddev = 0.0;
+void initWeights(Matrix& W, int inDim, int outDim, const std::string& init) {
+    // Initialize a weight matrix with random weights using a specific algorithm's distribution
+
+    double std = 0.0;
     if (init == "xavier" || init == "glorot") {
-        stddev = std::sqrt(2.0 / static_cast<double>(fan_in + fan_out));
+        std = std::sqrt(2.0 / static_cast<double>(inDim + outDim));
     } else {
-        // default to He/Kaiming
-        stddev = std::sqrt(2.0 / static_cast<double>(fan_in));
+        // default to Kaiming/He
+        std = std::sqrt(2.0 / static_cast<double>(inDim));
     }
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::normal_distribution<double> dist(0.0, stddev);
+    std::normal_distribution<double> dist(0.0, std);
 
     for (int i = 0; i < W.rows; i++) {
         for (int j = 0; j < W.cols; j++) {
             W.data[i][j] = dist(gen);
         }
     }
-}
+};
 
 
 Linear::Linear(int inDim, int outDim, const std::string& init) {
@@ -29,37 +31,11 @@ Linear::Linear(int inDim, int outDim, const std::string& init) {
     initWeights(W, inDim, outDim, init);
 
     b = Matrix(1, outDim);
-}
+};
 
 Matrix Linear::forward(Matrix& input) {
     Matrix output = matmul(input, W) + b;
     return output;
-};
-
-void Linear::optimizeWeights(double learning_rate) {
-    // Backpropagation and Gradient Descent for each parameter
-
-    // Update W
-    for (int i = 0; i < W.rows; i++) {
-        for (int j = 0; j < W.cols; j++) {
-            Var& weight_param = W.data[i][j];
-
-            // Partial derivative of the Loss function with respect to the weight parameter
-            double gradient = weight_param.getGrad();
-            weight_param.setVal(weight_param.getVal() - learning_rate * gradient);
-        }
-    }
-
-    // Update b
-    for (int i = 0; i < b.rows; i++) {
-        for (int j = 0; j < b.cols; j++) {
-            Var& bias_param = b.data[i][j];
-
-            // Partial derivative of the Loss function with respect to the bias parameter
-            double gradient = bias_param.getGrad();
-            bias_param.setVal(bias_param.getVal() - learning_rate * gradient);
-        }
-    }
 };
 
 void Linear::resetGrad() {
@@ -70,16 +46,12 @@ void Linear::resetGrad() {
 ReLU::ReLU() {
     name = "ReLU()";
     trainable = false;
-}
+};
 
 Matrix ReLU::forward(Matrix& input) {
     Matrix output = input.relu();
     return output;
 };
-
-void ReLU::optimizeWeights(double learning_rate) {
-    (void)learning_rate;
-}
 
 void ReLU::resetGrad() {}
 
@@ -87,99 +59,75 @@ LeakyReLU::LeakyReLU(double a) {
     alpha = a;
     name = "LeakyReLU(alpha=" + std::to_string(alpha) + ")";
     trainable = false;
-}
+};
 
 Matrix LeakyReLU::forward(Matrix& input) {
     Matrix output = input.leakyRelu(alpha);
     return output;
 };
 
-void LeakyReLU::optimizeWeights(double learning_rate) {
-    (void)learning_rate;
-}
-
-void LeakyReLU::resetGrad() {}
+void LeakyReLU::resetGrad() {};
 
 Sigmoid::Sigmoid() {
     name = "Sigmoid()";
     trainable = false;
-}
+};
 
 Matrix Sigmoid::forward(Matrix& input) {
     Matrix output = input.sigmoid();
     return output;
 };
 
-void Sigmoid::optimizeWeights(double learning_rate) {
-    (void)learning_rate;
-}
-
-void Sigmoid::resetGrad() {}
+void Sigmoid::resetGrad() {};
 
 Tanh::Tanh() {
     name = "Tanh()";
     trainable = false;
-}
+};
 
 Matrix Tanh::forward(Matrix& input) {
     Matrix output = input.tanh();
     return output;
 };
 
-void Tanh::optimizeWeights(double learning_rate) {
-    (void)learning_rate;
-}
-
-void Tanh::resetGrad() {}
+void Tanh::resetGrad() {};
 
 SiLU::SiLU() {
     name = "SiLU()";
     trainable = false;
-}
+};
 
 Matrix SiLU::forward(Matrix& input) {
     Matrix output = input.silu();
     return output;
 };
 
-void SiLU::optimizeWeights(double learning_rate) {
-    (void)learning_rate;
-}
-
-void SiLU::resetGrad() {}
+void SiLU::resetGrad() {};
 
 ELU::ELU(double a) {
     alpha = a;
     name = "ELU(alpha=" + std::to_string(alpha) + ")";
     trainable = false;
-}
+};
 
 Matrix ELU::forward(Matrix& input) {
     Matrix output = input.elu(alpha);
     return output;
 };
 
-void ELU::optimizeWeights(double learning_rate) {
-    (void)learning_rate;
-}
-
-void ELU::resetGrad() {}
+void ELU::resetGrad() {};
 
 Softmax::Softmax() {
     name = "Softmax()";
     trainable = false;
-}
+};
 
 Matrix Softmax::forward(Matrix& input) {
     Matrix output = input.softmax();
     return output;
 };
 
-void Softmax::optimizeWeights(double learning_rate) {
-    (void)learning_rate;
-}
-
-void Softmax::resetGrad() {}
+void Softmax::resetGrad() {};
 
 NeuralNetwork::NeuralNetwork(std::vector<std::shared_ptr<Layer>> network) {
     layers = std::move(network);
@@ -187,20 +135,21 @@ NeuralNetwork::NeuralNetwork(std::vector<std::shared_ptr<Layer>> network) {
 
 std::vector<std::shared_ptr<Layer>> NeuralNetwork::getLayers() {
     return layers;
-}
+};
 
 const std::vector<std::shared_ptr<Layer>> NeuralNetwork::getLayers() const {
     return layers;
-}
+};
 
 void NeuralNetwork::addLayer(std::shared_ptr<Layer> layer) {
     layers.push_back(std::move(layer));
-}
+};
 
 Matrix NeuralNetwork::forward(Matrix input) {
-    for (auto& layer : layers) {
+    for (std::shared_ptr<Layer> layer : layers) {
         input = layer->forward(input);
     }
+
     return input;
 };
 
@@ -211,7 +160,7 @@ std::string NeuralNetwork::getNetworkArchitecture() const {
 
     std::string architecture = "";
 
-    for (auto& layer : layers) {
+    for (std::shared_ptr<Layer> layer : layers) {
         architecture += layer->name + "\n";
     }
 
@@ -219,20 +168,23 @@ std::string NeuralNetwork::getNetworkArchitecture() const {
 };
 
 void NeuralNetwork::saveWeights(const std::string& path) {
+    // Save all neural network model weights to a .bin binary file
+
     std::ofstream outFile(path, std::ios::binary);
     if (!outFile) throw std::runtime_error("Failed to open file");
 
-    int num = layers.size();
+    int num_layers = layers.size();
 
     // reinterpret_cast is used to treat the memory address of the struct as a character array (bytes)
-    outFile.write(reinterpret_cast<char*>(&num), sizeof(num));
+    outFile.write(reinterpret_cast<char*>(&num_layers), sizeof(num_layers));
 
-    for (auto& layer : layers) {
-        auto linear = std::dynamic_pointer_cast<Linear>(layer);
+    for (std::shared_ptr<Layer> layer : layers) {
+        std::shared_ptr<Linear> linear = std::dynamic_pointer_cast<Linear>(layer);
         if (!linear) continue;
 
         int weight_rows = linear->W.rows;
         int weight_cols = linear->W.cols;
+
         outFile.write(reinterpret_cast<char*>(&weight_rows), sizeof(weight_rows));
         outFile.write(reinterpret_cast<char*>(&weight_cols), sizeof(weight_cols));
 
@@ -245,6 +197,7 @@ void NeuralNetwork::saveWeights(const std::string& path) {
 
         int bias_rows = linear->b.rows;
         int bias_cols = linear->b.cols;
+
         outFile.write(reinterpret_cast<char*>(&bias_rows), sizeof(bias_rows));
         outFile.write(reinterpret_cast<char*>(&bias_cols), sizeof(bias_cols));
 
@@ -255,21 +208,24 @@ void NeuralNetwork::saveWeights(const std::string& path) {
             }
         }
     }
-}
+};
 
 void NeuralNetwork::loadWeights(const std::string& path) {
+    // Load all neural network model weights from a .bin binary file
+
     std::ifstream inFile(path, std::ios::binary);
     if (!inFile) throw std::runtime_error("Failed to open file");
 
-    int num = 0;
-    inFile.read(reinterpret_cast<char*>(&num), sizeof(num));
+    int num_layers = 0;
+    inFile.read(reinterpret_cast<char*>(&num_layers), sizeof(num_layers));
 
-    for (auto& layer : layers) {
-        auto linear = std::dynamic_pointer_cast<Linear>(layer);
+    for (std::shared_ptr<Layer> layer : layers) {
+        std::shared_ptr<Linear> linear = std::dynamic_pointer_cast<Linear>(layer);
         if (!linear) continue;
 
         int weight_rows;
         int weight_cols;
+
         inFile.read(reinterpret_cast<char*>(&weight_rows), sizeof(weight_rows));
         inFile.read(reinterpret_cast<char*>(&weight_cols), sizeof(weight_cols));
 
@@ -285,6 +241,7 @@ void NeuralNetwork::loadWeights(const std::string& path) {
 
         int bias_rows;
         int bias_cols;
+
         inFile.read(reinterpret_cast<char*>(&bias_rows), sizeof(bias_rows));
         inFile.read(reinterpret_cast<char*>(&bias_cols), sizeof(bias_cols));
 
@@ -298,4 +255,4 @@ void NeuralNetwork::loadWeights(const std::string& path) {
             }
         }
     }
-}
+};

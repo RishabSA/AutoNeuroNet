@@ -96,11 +96,11 @@ import numpy as np
 
 model = ann.NeuralNetwork(
     [
-        ann.Linear(784, 256, init="he"),
+        ann.Linear(784, 256, init="kaiming"),
         ann.ReLU(),
-        ann.Linear(256, 128, init="he"),
+        ann.Linear(256, 128, init="kaiming"),
         ann.ReLU(),
-        ann.Linear(128, 10, init="he"),
+        ann.Linear(128, 10, init="kaiming"),
         ann.Softmax(),
     ]
 )
@@ -111,7 +111,7 @@ optimizer = ann.SGDOptimizer(
 print(model)
 ```
 
-AutoNeuroNet also supports several loss functions, such as the `MSELoss`, `MAELoss`, `BCELoss`, `CrossEntropyLoss`, and `CrossEntropyLossWithLogits`, and optimzers, such as `GradientDescentOptimizer` and `SGDOptimizer`.
+AutoNeuroNet also supports several loss functions, such as the `MSELoss`, `MAELoss`, `BCELoss`, `CrossEntropyLoss`, and `CrossEntropyLossWithLogits`, and optimizers, such as `GradientDescentOptimizer`, `SGDOptimizer`, `AdagradOptimizer`, `RMSPropOptimizer`, `AdamOptimizer`, and `AdamWOptimizer`.
 
 ```python
 loss = ann.MSELoss(labels, logits)
