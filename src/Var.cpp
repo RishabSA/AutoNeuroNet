@@ -514,16 +514,13 @@ void Var::backward() {
             double local_grad = p.first; // ∂current/∂parent
             std::shared_ptr<Node> parent = p.second;
 
-            if (!parent->requires_grad) {
-                parent->pending_children -= 1;
-                continue;
-            }
+            parent->pending_children -= 1;
+
+            if (!parent->requires_grad) continue;
 
             // Accumulate gradients by the chain rule
             // ∂L/∂parent += ∂L/∂current * ∂current/∂parent
             parent->grad += current_node->grad * local_grad;
-
-            parent->pending_children -= 1;
 
             // Now that gradients for the current node (child node) have been accumulated, add the parent node to the nodes stack to process it next
             if (parent->pending_children == 0) {
