@@ -501,7 +501,7 @@ void Var::backward() {
         return;
     }
 
-    // Stack of nodes (LIFO) - start from the current variable
+    // Stack of nodes (FILO) - start from the current variable
     std::vector<std::shared_ptr<Node>> nodes;
     nodes.push_back(node);
 
